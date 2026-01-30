@@ -40,6 +40,7 @@
 
         .container {
             max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -48,6 +49,92 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 32px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 12px;
+                max-width: 100%;
+            }
+
+            .hero-section .container.grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                text-align: center;
+                padding: 0 8px;
+            }
+
+            .hero-content h1 {
+                font-size: 36px !important;
+                line-height: 1.1 !important;
+                margin-bottom: 16px !important;
+            }
+
+            .hero-content p {
+                font-size: 16px !important;
+                max-width: none !important;
+                line-height: 1.5 !important;
+                margin-bottom: 24px !important;
+            }
+
+            .hero-visual {
+                order: -1; /* Move image above text on mobile */
+                max-width: 100%;
+            }
+
+            .flex.gap-4 {
+                justify-content: center;
+                flex-direction: column;
+                gap: 12px !important;
+            }
+
+            .flex.gap-4 a {
+                width: 100%;
+                text-align: center;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .feature-card {
+                padding: 20px;
+                margin: 0 auto;
+                max-width: 100%;
+            }
+
+            h2 {
+                font-size: 28px !important;
+                margin-bottom: 12px !important;
+            }
+
+            /* Stats section mobile */
+            .hero-content > div:last-child {
+                flex-direction: column;
+                gap: 16px !important;
+                margin-top: 32px !important;
+            }
+
+            .hero-content > div:last-child > div {
+                text-align: center;
+            }
+
+            /* Reduce feature section padding */
+            #how-it-works {
+                padding: 60px 0 !important;
+            }
+
+            #how-it-works .container > div:first-child {
+                margin-bottom: 40px !important;
+            }
+
+            /* Footer grid stack on mobile */
+            footer .grid {
+                grid-template-columns: 1fr !important;
+                gap: 32px !important;
+            }
         }
 
         /* Flex Alignment */
@@ -101,14 +188,14 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section" style="padding: 40px 0;">
         <div class="hero-background">
             <div class="blob blob-1"></div>
             <div class="blob blob-2"></div>
             <div class="blob blob-3"></div>
         </div>
 
-        <div class="container grid items-center" style="grid-template-columns: 1fr 1fr;">
+        <div class="container grid items-center">
 
             <!-- Hero Content -->
             <div class="hero-content" style="z-index: 10;">
@@ -145,8 +232,15 @@
             </div>
 
             <!-- Hero Visual -->
-            <div class="hero-visual perspective-container" style="position: relative;">
+            <div class="hero-visual perspective-container">
                 <div class="dashboard-mockup float tilt-card">
+                    <!-- OCR Verified Badge -->
+                    <div style="position: relative; margin-bottom: 16px;">
+                        <div style="background: white; padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid rgba(56, 189, 248, 0.3); display: inline-block;">
+                            <span style="color: var(--color-neon-mint);">●</span> OCR Verified
+                        </div>
+                    </div>
+
                     <!-- Fake Dashboard UI -->
                     <div style="display: flex; gap: 16px; margin-bottom: 24px;">
                         <div
@@ -185,22 +279,18 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Floating Elements -->
-                <div class="float-delayed"
-                    style="position: absolute; top: -20px; right: -20px; background: white; padding: 12px 24px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(56, 189, 248, 0.3);">
-                    <span style="color: var(--color-neon-mint);">●</span> OCR Verified
-                </div>
-
-                <div class="float-slow"
-                    style="position: absolute; bottom: -40px; left: -20px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; border: 1px solid rgba(56, 189, 248, 0.3);">
-                    <div
-                        style="width: 32px; height: 32px; background: var(--color-sun-amber); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
-                        ⚠</div>
-                    <div>
-                        <div style="font-size: 12px; font-weight: 600;">Interaction Alert</div>
-                        <div style="font-size: 10px; color: var(--color-cool-grey);">Aspirin + Ibuprofen</div>
+                    <!-- Interaction Alert -->
+                    <div style="margin-top: 16px;">
+                        <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                            <div
+                                style="width: 32px; height: 32px; background: var(--color-sun-amber); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                ⚠</div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 600;">Interaction Alert</div>
+                                <div style="font-size: 10px; color: var(--color-cool-grey);">Aspirin + Ibuprofen</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -216,7 +306,7 @@
                     records efficiently.</p>
             </div>
 
-            <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="grid">
                 <!-- Card 1 -->
                 <div class="feature-card tilt-card">
                     <div class="icon-placeholder">
@@ -235,7 +325,7 @@
                 </div>
 
                 <!-- Card 2 -->
-                <div class="feature-card tilt-card" style="margin-top: 24px;"> <!-- Staggered -->
+                <div class="feature-card tilt-card">
                     <div class="icon-placeholder"
                         style="color: var(--color-neon-mint); background: rgba(52, 211, 153, 0.1);">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -269,97 +359,77 @@
         </div>
     </section>
 
-    <!-- Antigravity Footer -->
-    <footer
-        style="background: var(--color-ink-black); padding: 80px 0 40px; color: white; margin-top: 60px; position: relative; overflow: hidden;">
-        <!-- Background Glow -->
-        <div
-            style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); width: 600px; height: 200px; background: var(--color-electric-cyan); filter: blur(150px); opacity: 0.1; pointer-events: none;">
-        </div>
-
+    <!-- Team Members Section -->
+    <section class="team-section">
+        <div class="background-radial-glow"></div>
         <div class="container">
-            <div class="grid" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 60px;">
-                <!-- Brand Column -->
-                <div class="tilt-card" style="padding: 0;">
-                    <div class="logo font-display flex items-center float-slow"
-                        style="font-size: 28px; margin-bottom: 24px;">
-                        <span
-                            style="width: 12px; height: 12px; background: var(--color-neon-mint); border-radius: 50%; display: inline-block; margin-right: 12px; box-shadow: 0 0 10px var(--color-neon-mint);"
-                            class="pulse"></span>
-                        Medi-Sum
+            <h2>Meet Our Team</h2>
+            <p>The brilliant minds behind Medi-Sum's AI-powered healthcare innovation.</p>
+            <div class="team-grid">
+                <!-- Member 1 -->
+                <div class="team-member-card">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
                     </div>
-                    <p style="color: var(--color-cool-grey); line-height: 1.6; max-width: 300px;">
-                        Transforming healthcare data into actionable intelligence with the power of AI and effortless
-                        design.
-                    </p>
-                    <div class="flex gap-4" style="gap: 16px; margin-top: 24px;">
-                        <!-- Social Icons -->
-                        <a href="#" class="btn-outline"
-                            style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="btn-outline"
-                            style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" class="btn-outline"
-                            style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
-                    </div>
+                    <span class="name">Mohammed Arham Jamal</span>
                 </div>
 
-                <!-- Team Column -->
-                <div class="float-delayed" style="animation-duration: 9s; grid-column: span 3;">
-                    <h4 style="margin-bottom: 24px; color: white;">Team Members</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
-
-                        <!-- Member 1 -->
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="width: 40px; height: 40px; background: rgba(56, 189, 248, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-electric-cyan);">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mohammed Arham Jamal</span>
-                        </div>
-
-                        <!-- Member 2 -->
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="width: 40px; height: 40px; background: rgba(52, 211, 153, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-neon-mint);">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mirza Athiyab Baig</span>
-                        </div>
-
-                        <!-- Member 3 -->
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="width: 40px; height: 40px; background: rgba(251, 191, 36, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-sun-amber);">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mohammed Naser
-                                Dastagir</span>
-                        </div>
-
-                        <!-- Member 4 -->
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="width: 40px; height: 40px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-soft-crimson);">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mohammed Zaid Uddin</span>
-                        </div>
-
+                <!-- Member 2 -->
+                <div class="team-member-card">
+                    <div class="avatar" style="background: rgba(52, 211, 153, 0.1); color: var(--color-neon-mint);">
+                        <i class="fas fa-user"></i>
                     </div>
+                    <span class="name">Mirza Athiyab Baig</span>
+                </div>
+
+                <!-- Member 3 -->
+                <div class="team-member-card">
+                    <div class="avatar" style="background: rgba(251, 191, 36, 0.1); color: var(--color-sun-amber);">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="name">Mohammed Naser Dastagir</span>
+                </div>
+
+                <!-- Member 4 -->
+                <div class="team-member-card">
+                    <div class="avatar" style="background: rgba(239, 68, 68, 0.1); color: var(--color-soft-crimson);">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="name">Mohammed Zaid Uddin</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Antigravity Footer -->
+    <footer style="background: var(--color-ink-black); padding: 80px 24px 40px; color: white; margin-top: 60px; position: relative;">
+        <!-- Background Glow -->
+        <div style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); width: 600px; height: 200px; background: var(--color-electric-cyan); filter: blur(150px); opacity: 0.1; pointer-events: none;"></div>
+        <div class="container">
+            <div class="tilt-card" style="padding: 0; max-width: 400px;">
+                <div class="logo font-display flex items-center float-slow" style="font-size: 28px; margin-bottom: 24px;">
+                    <span style="width: 12px; height: 12px; background: var(--color-neon-mint); border-radius: 50%; display: inline-block; margin-right: 12px; box-shadow: 0 0 10px var(--color-neon-mint);" class="pulse"></span>
+                    Medi-Sum
+                </div>
+                <p style="color: var(--color-cool-grey); line-height: 1.6; max-width: 300px;">
+                    Transforming healthcare data into actionable intelligence with the power of AI and effortless design.
+                </p>
+                <div class="flex gap-4" style="gap: 16px; margin-top: 24px;">
+                    <!-- Social Icons -->
+                    <a href="#" class="btn-outline" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="btn-outline" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="btn-outline" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
                 </div>
             </div>
 
-            <div
-                style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; display: flex; justify-content: space-between; align-items: center; color: var(--color-cool-grey); font-size: 14px;">
-                <div>
-                    &copy; 2026 Medi-Sum Inc. All rights reserved.
-                </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-top: 60px; display: flex; justify-content: center; align-items: center; color: var(--color-cool-grey); font-size: 14px;">
+                <div>&copy; 2026 Medi-Sum Inc. All rights reserved.</div>
             </div>
         </div>
     </footer>

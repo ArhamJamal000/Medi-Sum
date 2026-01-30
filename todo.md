@@ -1,72 +1,82 @@
-# Medi-Sum Project Status
+# Prescription Result Page UI Improvements
 
-*Last Updated: January 29, 2026*
+## Tasks to Complete
 
----
+### 1. Page Heading Improvement
+- [x] Change heading to "Prescription #ID – Visit Reason: <Reason Text>"
+- [x] Apply styling: bold, 24-28px, center aligned, 20px margin bottom
+- [x] Add Date + Uploaded Time small text below heading
 
-## ✅ Completed Tasks
+### 2. Remove White Spaces
+- [x] Remove large margin-top, padding-top from dashboard-container
+- [x] Set max-width: 1100px and center the page
+- [x] Remove height: 100vh if present
+- [x] Reduce vertical spacing between cards to 15-20px
 
-| Feature | Status |
-|---------|--------|
-| **Authentication** | ✅ Login/Register with password hashing, CSRF protection |
-| **Upload** | ✅ File upload with validation (JPG/PNG/PDF) |
-| **OCR** | ✅ Gemini API + TrOCR fallback for handwriting |
-| **Structured Extraction** | ✅ Medicines, tests, summaries, visit reason, key insights |
-| **Display** | ✅ Results page with full prescription details |
-| **Database** | ✅ Users, Prescriptions, Medicines, Tests tables |
-| **History** | ✅ List all prescriptions with status |
-| **Timeline** | ✅ Simplified vertical layout showing prescriptions only |
-| **Delete** | ✅ Safe deletion with confirmation popup |
-| **Visit Reason** | ✅ AI-generated visit title on timeline |
-| **Key Insights** | ✅ AI-generated one-sentence diagnosis summary |
-| **Bug Fixes** | ✅ CSRF tokens, return value mismatch, cascade deletion |
-| **API Key Rotation** | ✅ Auto-cycles through 10 API keys on quota exceeded |
-| **Debug Logs Cleanup** | ✅ Replaced all print() with proper logging |
-| **RAG Chatbot** | ✅ AI assistant that answers questions about prescriptions |
-| **Multilingual Chatbot** | ✅ AI responds in Hindi, Tamil, Telugu, Bengali, Marathi |
-| **Health Vitals + Charts** | ✅ BP/sugar tracking with Chart.js graphs on dashboard |
-| **Visual Timeline** | ✅ Month headers, icons, pulse animation, modern UI |
+### 3. New Desktop Layout Structure
+- [x] Implement 2-Column Grid Layout (30-35% left, 65-70% right)
+- [x] Left Column: Prescription Preview, Key Details, Tests & Alerts
+- [x] Right Column: AI Summary, Medicines
+- [x] Top Row: Heading (full width)
 
----
+### 4. Container Enhancements
+- [x] Prescription Preview: Smaller height, max-height 300px, rounded corners, soft shadow
+- [x] AI Summary: Remove language dropdown, clean bullet list, padding 18-22px
+- [x] Medicines: Compact list view, reduce line spacing, card padding 15px
+- [x] Key Details & Tests: Smaller cards, equal width to preview, consistent radius
 
-## � Remaining Tasks
+### 5. Spacing Rules
+- [x] Card gap: 18px
+- [x] Section gap: 25px
+- [x] Page side padding: 20-30px
+- [x] Remove any extra <br> tags
 
-| Priority | Feature | Notes |
-|----------|---------|-------|
-| 🟢 **Low** | **Fix Dependencies** | ✅ requirements.txt synced with venv |
-| 🟢 **Low** | **Host/Debug Config** | ✅ Verified app.py defaults (Debug=False, Host=0.0.0.0) |
-| 🟢 **Low** | **Security Keys** | ✅ Updated with secure random key |
-| 🟡 **Medium** | **Code Structure** | Refactor `app.py` into Blueprints (Auth, OCR, Main) |
-| 🟢 **Low** | **Database** | Migrate to PostgreSQL (Future scalability) |
-| 🟢 **Low** | **Production Server** | ✅ Verified Gunicorn/Waitress setup |
+### 6. Mobile Responsive Layout
+- [x] Order: Heading, Prescription Preview, AI Summary, Medicines, Key Details, Tests & Alerts
+- [x] Full width containers on mobile
+- [x] Reduce padding on mobile
 
+### 7. Visual Enhancements
+- [x] Consistent border-radius (14-16px)
+- [x] Light shadow for all cards
+- [x] Slight gradient or light background tint
+- [x] Smooth hover effect
 
----
+### 8. Testing & Verification
+- [x] Test layout on desktop viewports (2-column grid: 32% left, 68% right)
+- [x] Test layout on mobile viewports (single column, responsive design)
+- [x] Verify no backend functionality affected (only UI/HTML/CSS changes)
+- [x] Ensure all cards display properly with new spacing (18px gaps, 25px margins)
 
-## 📋 Immediate Next Steps
+# AI Chat Assistant Page UI Improvements
 
-1. [x] Clean up debug `print()` statements from `app.py`
-2. [x] Handle Gemini API quota exceeded (API key rotation)
-3. [x] Add API keys to `.env` file (4 keys added)
-4. [x] Loading spinner during OCR processing
-5. [x] Test 3 real prescriptions end-to-end
-6. [x] Update `requirements.txt` (Critical)
-7. [x] Disable Flask Debug Mode & Configure Host
-8. [x] Generate new `SECRET_KEY`
-9. [ ] Refactor `app.py` -> Blueprints (Optional but recommended)
-10. [x] Create `run_prod.sh` script
+## Tasks to Complete
 
----
+### 1. HTML Structure Updates
+- [ ] Restructure page into top section (title/subtitle), middle section (chat container with empty state), and bottom sticky input section
 
-## 📁 Key Files
+### 2. CSS Improvements
+- [ ] Add responsive styles for desktop (70% width) and mobile (95% width)
+- [ ] Improve message bubble styles (right-align user with light blue background, left-align AI with light gray/green and avatar)
+- [ ] Style chat container: height 450-500px, border-radius 16px, soft shadow, light background, padding 15px, scroll enabled
+- [ ] Style input bar as sticky: text input 80%, send button 20%, height ~45px, padding 10-12px, rounded
+- [ ] Add animations (fade in for messages), styled scrollbar, hover effects on send button, slight gradient background
 
-- `app.py` - Main Flask application
-- `templates/` - All HTML templates
-- `static/uploads/` - Uploaded prescription images
-- `instance/medisum.db` - SQLite database
+### 3. JavaScript Enhancements
+- [ ] Add Enter key listener for sending messages
+- [ ] Clear input after send, prevent empty messages
+- [ ] Auto-scroll to latest message
+- [ ] Manage empty state (hide welcome message and prompts after first user message)
 
-## 🔑 Environment Variables
+### 4. Empty State Implementation
+- [ ] Implement welcome message with AI avatar and example prompt cards that disappear after first interaction
 
-- `SECRET_KEY` - Flask session key
-- `GEMINI_API_KEY` - Single Gemini API key (fallback)
-- `GEMINI_API_KEYS` - Comma-separated list of 10 API keys for rotation
+### 5. Mobile Responsiveness
+- [ ] Adjust chat width to 100%, input bar full width, send button as icon only
+- [ ] Ensure no horizontal scroll, messages stack properly
+
+### 6. Testing & Verification
+- [ ] Test UI on desktop and mobile
+- [ ] Verify message sending functionality (input capture, Enter key, button click, clearing input, auto-scroll)
+- [ ] Ensure empty state works correctly
+- [ ] Confirm no backend changes (only UI/HTML/CSS/JS input handling)
