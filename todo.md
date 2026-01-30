@@ -33,12 +33,12 @@
 
 | Priority | Feature | Notes |
 |----------|---------|-------|
-| 🔴 **High** | **Fix Dependencies** | `requirements.txt` missing transformers, torch, etc. |
-| 🔴 **High** | **Host/Debug Config** | Disable `debug=True`, use `0.0.0.0` for host |
-| 🔴 **High** | **Security Keys** | Change default `SECRET_KEY` in `.env` |
+| 🟢 **Low** | **Fix Dependencies** | ✅ requirements.txt synced with venv |
+| 🟢 **Low** | **Host/Debug Config** | ✅ Verified app.py defaults (Debug=False, Host=0.0.0.0) |
+| 🟢 **Low** | **Security Keys** | ✅ Updated with secure random key |
 | 🟡 **Medium** | **Code Structure** | Refactor `app.py` into Blueprints (Auth, OCR, Main) |
 | 🟢 **Low** | **Database** | Migrate to PostgreSQL (Future scalability) |
-| 🔴 **High** | **Production Server** | Setup Gunicorn/Waitress (Don't use `flask run`) |
+| 🟢 **Low** | **Production Server** | ✅ Verified Gunicorn/Waitress setup |
 
 
 ---
@@ -50,11 +50,11 @@
 3. [x] Add API keys to `.env` file (4 keys added)
 4. [x] Loading spinner during OCR processing
 5. [x] Test 3 real prescriptions end-to-end
-6. [ ] Update `requirements.txt` (Critical)
-7. [ ] Disable Flask Debug Mode & Configure Host
-8. [ ] Generate new `SECRET_KEY`
+6. [x] Update `requirements.txt` (Critical)
+7. [x] Disable Flask Debug Mode & Configure Host
+8. [x] Generate new `SECRET_KEY`
 9. [ ] Refactor `app.py` -> Blueprints (Optional but recommended)
-10. [ ] Create `run_prod.sh` script
+10. [x] Create `run_prod.sh` script
 
 ---
 

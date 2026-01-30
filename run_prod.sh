@@ -2,10 +2,13 @@
 # Script to run the app locally in production mode (using gunicorn)
 # This simulates how it will run on Hugging Face Spaces
 
+# Activate virtual environment
+source venv/bin/activate
+
 # Install gunicorn if not present
 if ! command -v gunicorn &> /dev/null
 then
-    echo "Gunicorn not found. Installing..."
+    echo "Gunicorn not found in venv. Installing..."
     pip install gunicorn
 fi
 
