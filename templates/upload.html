@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Prescription - Medi-Sum{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 500px;">
+    <h1>Upload Prescription</h1>
+
+    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="file">Select Prescription Image</label>
+            <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
+                style="padding: 1rem; border: 2px dashed #d1d5db; border-radius: 8px; width: 100%; cursor: pointer;">
+            <p style="color: #6b7280; font-size: 0.875rem; margin-top: 0.5rem;">
+                Accepted formats: JPG, PNG, PDF (max 16MB)
+            </p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn">Upload & Analyze</button>
+    </form>
+
+    <p class="form-footer">
+        <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+    </p>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div style="text-align: center; color: white;">
+        <div class="spinner"
+            style="width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.3); border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem;">
+        </div>
+        <h2 style="margin-bottom: 0.5rem;">Analyzing Prescription...</h2>
+        <p style="color: #a0aec0;">This may take 15-30 seconds</p>
+        <p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem;">
+            🔍 Extracting text with AI OCR<br>
+            💊 Identifying medicines & dosages<br>
+            📋 Generating insights
+        </p>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+        var fileInput = document.getElementById('file');
+        if (fileInput.files.length > 0) {
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            // Disable submit button to prevent double submission
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = 'Processing...';
+        }
+    });
+</script>
+{% endblock %}

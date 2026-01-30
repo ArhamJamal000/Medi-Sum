@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescription History - Medi-Sum{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1>Prescription History</h1>
+        <a href="{{ url_for('upload') }}" class="btn btn-primary" style="width: auto;">+ Upload New</a>
+    </div>
+
+    {% if prescriptions %}
+    <div class="card">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f9fafb;">
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">#</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Upload Date</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Type</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Status</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prescription in prescriptions %}
+                <tr>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{ prescription.prescription_id }}
+                    </td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{
+                        prescription.upload_date.strftime('%b %d, %Y') }}</td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                        {{ prescription.image_path.rsplit('.', 1)[-1].upper() }}
+                    </td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                        {% if prescription.ocr_text %}
+                        <span
+                            style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">Processed</span>
+                        {% else %}
+                        <span
+                            style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                        <a href="{{ url_for('view_prescription', prescription_id=prescription.prescription_id) }}"
+                            style="color: #2563eb; text-decoration: none; margin-right: 10px;">View →</a>
+
+                        <form
+                            action="{{ url_for('delete_prescription', prescription_id=prescription.prescription_id) }}"
+                            method="POST" style="display: inline;"
+                            onsubmit="return confirm('Are you sure you want to delete this?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <button type="submit"
+                                style="background: none; border: none; color: #ef4444; cursor: pointer; text-decoration: underline; padding: 0;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem;">
+        <p style="color: #6b7280; margin-bottom: 1rem;">No prescriptions uploaded yet.</p>
+        <a href="{{ url_for('upload') }}" class="btn btn-primary" style="width: auto; display: inline-block;">Upload
+            Your First Prescription</a>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 1.5rem;">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

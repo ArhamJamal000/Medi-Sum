@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Error {{ error_code }} - Medi-Sum{% endblock %}
+
+{% block content %}
+<div class="form-container" style="text-align: center;">
+    <h1 style="font-size: 4rem; color: #ef4444;">{{ error_code }}</h1>
+    <p style="font-size: 1.25rem; color: #6b7280; margin-bottom: 1.5rem;">{{ message }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary" style="display: inline-block; width: auto;">
+        Go Home
+    </a>
+</div>
+{% endblock %}

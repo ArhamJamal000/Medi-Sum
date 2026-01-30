@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Medi-Sum{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 1.5rem;">Welcome, {{ current_user.name }}! 👋</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="number">{{ prescription_count }}</div>
+        <div class="label">Prescriptions</div>
+    </div>
+    <div class="stat-card">
+        <div class="number" style="color: #10b981;">{{ medicine_count }}</div>
+        <div class="label">Medicines</div>
+    </div>
+    <div class="stat-card">
+        <div class="number" style="color: #f59e0b;">{{ test_count }}</div>
+        <div class="label">Medical Tests</div>
+    </div>
+    <div class="stat-card">
+        <div class="number" style="color: {% if pending_tests > 0 %}#ef4444{% else %}#6b7280{% endif %};">{{
+            pending_tests }}</div>
+        <div class="label">Pending Tests</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Quick Actions</h2>
+    <p style="margin-bottom: 1rem;">Upload a new prescription to get started.</p>
+    <a href="{{ url_for('upload') }}" class="btn btn-primary" style="display: inline-block; width: auto;">
+        📤 Upload Prescription
+    </a>
+</div>
+
+<!-- Active Alerts Section -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+    <!-- Active Medicines -->
+    <div class="card">
+        <h2 style="color: #059669;">💊 Active Medicines</h2>
+        {% if active_medicines %}
+        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+            {% for med in active_medicines %}
+            <li style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                <strong>{{ med.name }}</strong>
+                <br>
+                <span style="color: #6b7280; font-size: 0.875rem;">
+                    {{ med.dosage or '' }} • {{ med.frequency or '' }}
+                </span>
+                {% if med.instructions %}
+                <br>
+                <span style="color: #059669; font-size: 0.875rem; font-style: italic;">
+                    Note: {{ med.instructions }}
+                </span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="color: #6b7280;">No active medicines currently.</p>
+        {% endif %}
+    </div>
+
+    <!-- Pending Tests -->
+    <div class="card">
+        <h2 style="color: #dc2626;">⚠️ Pending Tests</h2>
+        {% if pending_tests_list %}
+        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+            {% for test in pending_tests_list %}
+            <li style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                <strong>{{ test.test_name }}</strong>
+                {% if test.instructions %}
+                <br>
+                <span style="color: #dc2626; font-size: 0.875rem;">
+                    Instructions: {{ test.instructions }}
+                </span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="color: #6b7280;">No pending tests.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if recent_prescriptions %}
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Recent Prescriptions</h2>
+    <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+        {% for prescription in recent_prescriptions %}
+        <li
+            style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>Prescription #{{ prescription.prescription_id }}</strong>
+                <span style="color: #6b7280; margin-left: 1rem;">
+                    {{ prescription.upload_date.strftime('%b %d, %Y') }}
+                </span>
+                {% if prescription.medicines|length > 0 %}
+                <span
+                    style="background: #d1fae5; color: #065f46; padding: 0.125rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;">
+                    {{ prescription.medicines|length }} medicine{{ 's' if prescription.medicines|length > 1 else '' }}
+                </span>
+                {% endif %}
+            </div>
+            <a href="{{ url_for('view_prescription', prescription_id=prescription.prescription_id) }}"
+                style="color: #2563eb; text-decoration: none;">View →</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <div style="margin-top: 1rem;">
+        <a href="{{ url_for('history') }}" style="color: #2563eb; text-decoration: none;">View all prescriptions →</a>
+    </div>
+</div>
+{% else %}
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Recent Prescriptions</h2>
+    <p style="color: #6b7280;">No prescriptions uploaded yet. Upload your first prescription to get started!</p>
+</div>
+{% endif %}
+
+<!-- Health Vitals Tracking -->
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>❤️ Health Vitals</h2>
+    <p style="color: #6b7280; margin-bottom: 1rem;">Record your daily BP and sugar levels.</p>
+
+    <!-- Input Form -->
+    <form id="vitalsForm"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <label style="font-size: 0.875rem; color: #374151;">BP Systolic</label>
+            <input type="number" id="bpSystolic" placeholder="120" min="60" max="250"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+            <label style="font-size: 0.875rem; color: #374151;">BP Diastolic</label>
+            <input type="number" id="bpDiastolic" placeholder="80" min="40" max="150"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+            <label style="font-size: 0.875rem; color: #374151;">Sugar (mg/dL)</label>
+            <input type="number" id="sugarLevel" placeholder="100" min="30" max="600"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+            <label style="font-size: 0.875rem; color: #374151;">Sugar Type</label>
+            <select id="sugarType" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                <option value="fasting">Fasting</option>
+                <option value="random">Random</option>
+                <option value="post_meal">Post Meal</option>
+            </select>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.5rem;">
+                Save Today's Reading
+            </button>
+        </div>
+    </form>
+
+    <!-- Charts -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background: #f9fafb; padding: 1rem; border-radius: 8px;">
+            <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">📊 Blood Pressure Trend</h3>
+            <canvas id="bpChart" height="150"></canvas>
+        </div>
+        <div style="background: #f9fafb; padding: 1rem; border-radius: 8px;">
+            <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">🍬 Sugar Level Trend</h3>
+            <canvas id="sugarChart" height="150"></canvas>
+        </div>
+    </div>
+
+    <!-- Readings History -->
+    <h3 style="margin-bottom: 0.5rem;">Recent Readings</h3>
+    <div id="readingsTable" style="max-height: 200px; overflow-y: auto;">
+        <p style="color: #6b7280;">Loading...</p>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let bpChart, sugarChart;
+
+    // Delete reading
+    async function deleteReading(id) {
+        if (!confirm('Delete this reading?')) return;
+        try {
+            await fetch('/api/health/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            });
+            loadReadings();
+        } catch (error) {
+            console.error('Delete failed:', error);
+            alert('Failed to delete reading');
+        }
+    }
+
+    // Event Delegation for Delete Buttons
+    document.getElementById('readingsTable').addEventListener('click', function (e) {
+        if (e.target.closest('.delete-btn')) {
+            const btn = e.target.closest('.delete-btn');
+            const id = btn.getAttribute('data-id');
+            deleteReading(id);
+        }
+    });
+
+    // Load readings and render charts
+    async function loadReadings() {
+        try {
+            const response = await fetch('/api/health');
+            const data = await response.json();
+            const readings = data.readings.reverse(); // Oldest first for charts
+
+            // Render table
+            const tableHtml = readings.length ? `
+        <table style="width: 100%; font-size: 0.875rem;">
+            <thead>
+                <tr style="background: #f3f4f6;">
+                    <th style="padding: 0.5rem; text-align: left;">Date</th>
+                    <th style="padding: 0.5rem;">BP</th>
+                    <th style="padding: 0.5rem;">Sugar</th>
+                    <th style="padding: 0.5rem;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                ${readings.slice().reverse().map(r => `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 0.5rem;">${r.date}</td>
+                        <td style="padding: 0.5rem; text-align: center;">${r.bp_systolic || '-'}/${r.bp_diastolic || '-'}</td>
+                        <td style="padding: 0.5rem; text-align: center;">${r.sugar_level || '-'} <small style="color:#6b7280;">${r.sugar_type || ''}</small></td>
+                        <td style="padding: 0.5rem; text-align: center;">
+                            <button type="button" class="delete-btn" data-id="${r.id}" style="color: #dc2626; border: none; background: none; cursor: pointer;">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+        ` : '<p style="color: #6b7280;">No readings yet. Add your first reading above!</p>';
+
+            document.getElementById('readingsTable').innerHTML = tableHtml;
+
+            // Render BP Chart
+            const bpCtx = document.getElementById('bpChart').getContext('2d');
+            if (bpChart) bpChart.destroy();
+            bpChart = new Chart(bpCtx, {
+                type: 'line',
+                data: {
+                    labels: readings.map(r => r.date.slice(5)),
+                    datasets: [{
+                        label: 'Systolic',
+                        data: readings.map(r => r.bp_systolic),
+                        borderColor: '#ef4444',
+                        tension: 0.3,
+                        fill: false
+                    }, {
+                        label: 'Diastolic',
+                        data: readings.map(r => r.bp_diastolic),
+                        borderColor: '#3b82f6',
+                        tension: 0.3,
+                        fill: false
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: true } } }
+            });
+
+            // Render Sugar Chart
+            const sugarCtx = document.getElementById('sugarChart').getContext('2d');
+            if (sugarChart) sugarChart.destroy();
+            sugarChart = new Chart(sugarCtx, {
+                type: 'line',
+                data: {
+                    labels: readings.map(r => r.date.slice(5)),
+                    datasets: [{
+                        label: 'Sugar (mg/dL)',
+                        data: readings.map(r => r.sugar_level),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: true } } }
+            });
+        } catch (e) {
+            console.error("Error loading readings:", e);
+        }
+    }
+
+    // Add reading
+    document.getElementById('vitalsForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const data = {
+            bp_systolic: document.getElementById('bpSystolic').value,
+            bp_diastolic: document.getElementById('bpDiastolic').value,
+            sugar_level: document.getElementById('sugarLevel').value,
+            sugar_type: document.getElementById('sugarType').value
+        };
+
+        if (!data.bp_systolic && !data.sugar_level) {
+            alert('Please enter at least BP or Sugar level');
+            return;
+        }
+
+        try {
+            await fetch('/api/health', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(data)
+            });
+
+            this.reset();
+            loadReadings();
+        } catch (e) {
+            console.error("Error adding reading:", e);
+            alert("Failed to add reading");
+        }
+    });
+
+    // Load on page load
+    loadReadings();
+</script>
+
+{% endblock %}

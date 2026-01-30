@@ -1,0 +1,68 @@
+MEDI-SUM PROJECT FEATURES
+=========================
+
+1. USER AUTHENTICATION & SECURITY
+---------------------------------
+- Secure Login & Registration
+- Password Hashing (Werkzeug)
+- CSRF Protection (all forms & AJAX requests)
+- Session Management (Flask-Login)
+- Safe Logout
+
+2. PRESCRIPTION MANAGEMENT
+--------------------------
+- File Upload: Supports Images (JPG/PNG) and PDFs
+- Image Pre-processing: Enhancement for better OCR results
+- Hybrid OCR System:
+  - Google Gemini API (Primary)
+  - TrOCR (Fallback for handwriting)
+- Smart Deletion: Safe delete with confirmation
+
+3. AI ANALYSIS & EXTRACTION
+---------------------------
+- Structured Data Extraction:
+  - Medicines (Name, Dosage, Frequency, Duration)
+  - Medical Tests (Name, Status, Instructions)
+- AI Summaries:
+  - "Key Insights" (One-sentence diagnosis summary)
+  - "Visit Reason" (Auto-generated title)
+  - Patient Summary (Detailed overview)
+
+4. DASHBOARD & VISUALIZATION
+----------------------------
+- Quick Stats: Total prescriptions, medicines, tests, pending tests
+- Active Alerts:
+  - "Active Medicines" list
+  - "Pending Tests" warnings
+- Recent Activity Feed
+- Responsive Cards Layout
+
+5. MEDICAL TIMELINE
+-------------------
+- Visual History: Chronological view of health journey
+- Grouping: Sticky Month/Year headers
+- Icons: Auto-detected icons for Visits (🏥) vs Tests (🧪)
+- Interactive: Click to view full prescription details
+- Animations: Pulse effect on latest event
+
+6. HEALTH VITALS TRACKING
+-------------------------
+- Daily Recording: Blood Pressure (Systolic/Diastolic) & Sugar Levels
+- Data Visualization: Interactive Line Charts (Chart.js)
+- History Management: Tabular view with delete capability
+- Logic: Validates one entry per day (updates existing)
+
+7. AI HEALTH ASSISTANT (CHATBOT)
+--------------------------------
+- RAG Architecture: Answers based ONLY on your prescription data
+- Multilingual Support:
+  - English, Hindi (हिंदी), Tamil (தமிழ்), Telugu (తెలుగు), Bengali (বাংলা), Marathi (मराठी)
+- Dedicated API: Separate quota key for chat reliability
+- Context Aware: Knows past meds, tests, and dates
+
+8. TECHNICAL & INFRASTRUCTURE
+-----------------------------
+- API Key Rotation: Auto-cycles through 10+ keys to handle quota limits
+- Database: SQLite with SQLAlchemy ORM
+- Error Handling: Custom 404/500 pages and flash messages
+- Logging: Structured logging instead of print debugging

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Medical Timeline - Medi-Sum{% endblock %}
+
+{% block content %}
+<style>
+    /* Timeline Container */
+    .timeline-container {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 0;
+    }
+
+    /* Vertical Line */
+    .timeline-container::after {
+        content: '';
+        position: absolute;
+        width: 4px;
+        background-color: #e5e7eb;
+        top: 0;
+        bottom: 0;
+        left: 24px;
+        border-radius: 2px;
+    }
+
+    /* Timeline Item */
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-left: 60px;
+    }
+
+    /* Month Header */
+    .month-header {
+        position: sticky;
+        top: 80px;
+        background: #f9fafb;
+        color: #6b7280;
+        font-weight: bold;
+        font-size: 0.875rem;
+        padding: 0.5rem 0;
+        margin-bottom: 1.5rem;
+        z-index: 10;
+        margin-left: 60px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Circle Icon */
+    .icon-circle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: white;
+        border: 4px solid #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        z-index: 2;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-circle.latest {
+        border-color: #10b981;
+        animation: pulse 2s infinite;
+    }
+
+    /* Content Card */
+    .card-content {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+    .card-content:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+
+    /* Tags */
+    .tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .tag.tag-visit {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .tag.tag-test {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+</style>
+
+<div style="max-width: 800px; margin: 0 auto; padding-bottom: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin-bottom: 0.5rem;">📅 Medical Timeline</h1>
+            <p style="color: #6b7280;">Your health journey at a glance</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back</a>
+    </div>
+
+    {% if events %}
+    <div class="timeline-container">
+        {% set current_month = namespace(value=None) %}
+
+        {% for event in events %}
+        {% set event_month = event.date.strftime('%B %Y') %}
+
+        {% if current_month.value != event_month %}
+        <div class="month-header">{{ event_month }}</div>
+        {% set current_month.value = event_month %}
+        {% endif %}
+
+        <div class="timeline-item">
+            <div class="icon-circle {{ 'latest' if loop.first }}">
+                {% if 'blood test' in event.title.lower() or 'lab' in event.title.lower() %}
+                🧪
+                {% else %}
+                🏥
+                {% endif %}
+            </div>
+
+            <a href="{{ url_for('view_prescription', prescription_id=event.prescription_id) }}" class="card-content">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                    <div>
+                        <div style="font-size: 0.875rem; color: #6b7280; font-weight: 500; margin-bottom: 0.25rem;">
+                            {{ event.date.strftime('%A, %B %d') }}
+                        </div>
+                        <h3 style="margin: 0; font-size: 1.125rem; color: #111827;">{{ event.title }}</h3>
+                    </div>
+                    <span class="tag tag-visit">Visit</span>
+                </div>
+
+                {% if event.description %}
+                <p style="color: #4b5563; margin-bottom: 0.75rem; line-height: 1.5;">
+                    {{ event.description }}
+                </p>
+                {% endif %}
+
+                {% if event.details %}
+                <div
+                    style="background: #f9fafb; padding: 0.75rem; border-radius: 6px; font-size: 0.875rem; color: #6b7280; border: 1px dashed #e5e7eb;">
+                    {{ event.details }}
+                </div>
+                {% endif %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+        <h3 style="color: #374151; margin-bottom: 0.5rem;">No timeline events yet</h3>
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">Upload a prescription to start building your medical history.
+        </p>
+        <a href="{{ url_for('upload') }}" class="btn btn-primary" style="display: inline-block; width: auto;">
+            📤 Upload First Prescription
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

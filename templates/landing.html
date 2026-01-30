@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medi-Sum | AI-Powered Prescription Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/antigravity.css') }}">
+    <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+    <!-- Optional: FontAwesome -->
+    <style>
+        /* Fallback for icons if kit not provided, or use SVG */
+        .icon-placeholder {
+            width: 48px;
+            height: 48px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-electric-cyan);
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+
+        /* Flex Alignment */
+        .flex {
+            display: flex;
+        }
+
+        .flex-between {
+            justify-content: space-between;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        /* Dashboard Mockup */
+        .dashboard-mockup {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(56, 189, 248, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transform: rotateX(5deg) rotateY(-5deg);
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="nav-glass">
+        <div class="container flex flex-between items-center" style="height: 80px;">
+            <div class="logo font-display flex items-center" style="font-size: 24px; color: var(--color-storm-grey);">
+                <span
+                    style="width: 12px; height: 12px; background: var(--color-neon-mint); border-radius: 50%; display: inline-block; margin-right: 12px; box-shadow: 0 0 10px var(--color-neon-mint);"
+                    class="pulse"></span>
+                Medi-Sum
+            </div>
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="btn-primary">Go to Dashboard</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn-outline"
+                    style="margin-right: 16px; border: none; color: var(--color-cool-grey);">Log In</a>
+                <a href="{{ url_for('register') }}" class="btn-primary">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-background">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
+
+        <div class="container grid items-center" style="grid-template-columns: 1fr 1fr;">
+
+            <!-- Hero Content -->
+            <div class="hero-content" style="z-index: 10;">
+                <div style="display: inline-block; padding: 8px 16px; background: rgba(56, 189, 248, 0.1); color: var(--color-electric-cyan); border-radius: 50px; margin-bottom: 24px; font-weight: 600; font-size: 14px;"
+                    class="fade-in-up">
+                    ✨ AI-Powered Healthcare
+                </div>
+
+                <h1 style="font-size: 64px; margin: 0 0 24px 0; line-height: 1.1;" class="bg-gradient-text fade-in-up">
+                    Prescription<br>Intelligence
+                </h1>
+
+                <p style="font-size: 18px; color: var(--color-cool-grey); line-height: 1.6; margin-bottom: 40px; max-width: 500px;"
+                    class="fade-in-up">
+                    Transform handwritten notes into actionable health insights. Organize, track, and understand your
+                    medical history with zero gravity effort.
+                </p>
+
+                <div class="flex gap-4 fade-in-up" style="gap: 16px;">
+                    <a href="{{ url_for('register') }}" class="btn-primary glow">Start Free Trial</a>
+                    <a href="#how-it-works" class="btn-outline">Watch Demo</a>
+                </div>
+
+                <div style="margin-top: 48px; display: flex; gap: 32px;" class="fade-in-up">
+                    <div>
+                        <h3 style="margin: 0; font-size: 32px; color: var(--color-storm-grey);">98%</h3>
+                        <p style="margin: 0; color: var(--color-cool-grey); font-size: 14px;">Accuracy</p>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 32px; color: var(--color-storm-grey);">7s</h3>
+                        <p style="margin: 0; color: var(--color-cool-grey); font-size: 14px;">Processing</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Visual -->
+            <div class="hero-visual perspective-container" style="position: relative;">
+                <div class="dashboard-mockup float tilt-card">
+                    <!-- Fake Dashboard UI -->
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                        <div
+                            style="width: 40px; height: 40px; background: var(--color-electric-cyan); border-radius: 8px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <div
+                                style="height: 10px; width: 60%; background: #E2E8F0; border-radius: 4px; margin-bottom: 8px;">
+                            </div>
+                            <div style="height: 8px; width: 40%; background: #F1F5F9; border-radius: 4px;"></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #F8FAFC; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-family: 'JetBrains Mono'; font-size: 12px;">Rx: Amoxicillin</span>
+                            <span style="color: var(--color-neon-mint); font-size: 12px;">Active</span>
+                        </div>
+                        <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+                            <div style="width: 70%; height: 100%; background: var(--color-electric-cyan);"></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #F8FAFC; border-radius: 12px; padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-family: 'JetBrains Mono'; font-size: 12px;">BP: 120/80</span>
+                            <span style="color: var(--color-electric-cyan); font-size: 12px;">Normal</span>
+                        </div>
+                        <!-- Little Graph -->
+                        <div style="display: flex; align-items: flex-end; height: 30px; gap: 4px;">
+                            <div style="width: 10%; height: 40%; background: #E2E8F0; border-radius: 2px;"></div>
+                            <div style="width: 10%; height: 60%; background: #E2E8F0; border-radius: 2px;"></div>
+                            <div style="width: 10%; height: 50%; background: #E2E8F0; border-radius: 2px;"></div>
+                            <div
+                                style="width: 10%; height: 80%; background: var(--color-electric-cyan); border-radius: 2px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Elements -->
+                <div class="float-delayed"
+                    style="position: absolute; top: -20px; right: -20px; background: white; padding: 12px 24px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(56, 189, 248, 0.3);">
+                    <span style="color: var(--color-neon-mint);">●</span> OCR Verified
+                </div>
+
+                <div class="float-slow"
+                    style="position: absolute; bottom: -40px; left: -20px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                    <div
+                        style="width: 32px; height: 32px; background: var(--color-sun-amber); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                        ⚠</div>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 600;">Interaction Alert</div>
+                        <div style="font-size: 10px; color: var(--color-cool-grey);">Aspirin + Ibuprofen</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="how-it-works" style="padding: 100px 0; background: white; position: relative; z-index: 1;">
+        <div class="container">
+            <div style="text-align: center; max-width: 600px; margin: 0 auto 60px auto;">
+                <h2 style="font-size: 40px; margin-bottom: 16px;">Intelligent Features</h2>
+                <p style="color: var(--color-cool-grey); font-size: 18px;">Everything you need to manage your health
+                    records efficiently.</p>
+            </div>
+
+            <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+                <!-- Card 1 -->
+                <div class="feature-card tilt-card">
+                    <div class="icon-placeholder">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <h3 style="margin-bottom: 12px;">Smart OCR</h3>
+                    <p style="color: var(--color-cool-grey); line-height: 1.5;">Instantly convert handwritten
+                        prescriptions into digital, searchable text with human-level accuracy.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="feature-card tilt-card" style="margin-top: 24px;"> <!-- Staggered -->
+                    <div class="icon-placeholder"
+                        style="color: var(--color-neon-mint); background: rgba(52, 211, 153, 0.1);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <activity>
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </activity>
+                        </svg>
+                    </div>
+                    <h3 style="margin-bottom: 12px;">Health Timeline</h3>
+                    <p style="color: var(--color-cool-grey); line-height: 1.5;"> Visualize your medical history
+                        chronologically. Track changes in medication and vitals over time.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="feature-card tilt-card">
+                    <div class="icon-placeholder"
+                        style="color: var(--color-sun-amber); background: rgba(251, 191, 36, 0.1);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <h3 style="margin-bottom: 12px;">AI Assistant</h3>
+                    <p style="color: var(--color-cool-grey); line-height: 1.5;">Get doctor-grade summaries and
+                        patient-friendly explanations for every prescription you upload.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Antigravity Footer -->
+    <footer
+        style="background: var(--color-ink-black); padding: 80px 0 40px; color: white; margin-top: 60px; position: relative; overflow: hidden;">
+        <!-- Background Glow -->
+        <div
+            style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); width: 600px; height: 200px; background: var(--color-electric-cyan); filter: blur(150px); opacity: 0.1; pointer-events: none;">
+        </div>
+
+        <div class="container">
+            <div class="grid" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 60px;">
+                <!-- Brand Column -->
+                <div class="tilt-card" style="padding: 0;">
+                    <div class="logo font-display flex items-center float-slow"
+                        style="font-size: 28px; margin-bottom: 24px;">
+                        <span
+                            style="width: 12px; height: 12px; background: var(--color-neon-mint); border-radius: 50%; display: inline-block; margin-right: 12px; box-shadow: 0 0 10px var(--color-neon-mint);"
+                            class="pulse"></span>
+                        Medi-Sum
+                    </div>
+                    <p style="color: var(--color-cool-grey); line-height: 1.6; max-width: 300px;">
+                        Transforming healthcare data into actionable intelligence with the power of AI and effortless
+                        design.
+                    </p>
+                    <div class="flex gap-4" style="gap: 16px; margin-top: 24px;">
+                        <!-- Social Icons -->
+                        <a href="#" class="btn-outline"
+                            style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="btn-outline"
+                            style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="btn-outline"
+                            style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Column -->
+                <div class="float-delayed" style="animation-duration: 9s; grid-column: span 3;">
+                    <h4 style="margin-bottom: 24px; color: white;">Team Members</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+
+                        <!-- Member 1 -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div
+                                style="width: 40px; height: 40px; background: rgba(56, 189, 248, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-electric-cyan);">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mohammed Arham Jamal</span>
+                        </div>
+
+                        <!-- Member 2 -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div
+                                style="width: 40px; height: 40px; background: rgba(52, 211, 153, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-neon-mint);">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mirza Athiyab Baig</span>
+                        </div>
+
+                        <!-- Member 3 -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div
+                                style="width: 40px; height: 40px; background: rgba(251, 191, 36, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-sun-amber);">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mohammed Naser
+                                Dastagir</span>
+                        </div>
+
+                        <!-- Member 4 -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div
+                                style="width: 40px; height: 40px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-soft-crimson);">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span style="color: var(--color-cool-grey); font-weight: 500;">Mohammed Zaid Uddin</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div
+                style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; display: flex; justify-content: space-between; align-items: center; color: var(--color-cool-grey); font-size: 14px;">
+                <div>
+                    &copy; 2026 Medi-Sum Inc. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+</body>
+
+</html>

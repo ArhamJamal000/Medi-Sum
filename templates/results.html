@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescription Details - Medi-Sum{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <h1 style="margin-bottom: 1.5rem;">Prescription #{{ prescription.prescription_id }}</h1>
+
+    <!-- AI Summaries -->
+    {% if prescription.patient_summary or prescription.doctor_summary %}
+    <div class="card" style="border-left: 4px solid #10b981;">
+        <h2>📋 AI Summary</h2>
+
+        {% if prescription.patient_summary %}
+        <div style="margin-top: 1rem; padding: 1rem; background: #f0fdf4; border-radius: 8px;">
+            <strong style="color: #065f46;">For Patient:</strong>
+            <p style="margin-top: 0.5rem; color: #1f2937;">{{ prescription.patient_summary }}</p>
+        </div>
+        {% endif %}
+
+        {% if prescription.doctor_summary %}
+        <div style="margin-top: 1rem; padding: 1rem; background: #eff6ff; border-radius: 8px;">
+            <strong style="color: #1e40af;">Clinical Summary:</strong>
+            <p style="margin-top: 0.5rem; color: #1f2937;">{{ prescription.doctor_summary }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Medicines Table -->
+    {% if prescription.medicines %}
+    <div class="card" style="margin-top: 1.5rem;">
+        <h2>💊 Medicines ({{ prescription.medicines|length }})</h2>
+        <div style="overflow-x: auto; margin-top: 1rem;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                <thead>
+                    <tr style="background: #f9fafb;">
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Medicine</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Dosage</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Frequency</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Duration</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #e5e7eb;">Timing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in prescription.medicines %}
+                    <tr>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 500;">{{ med.name }}
+                        </td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{ med.dosage or '-' }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{ med.frequency or '-' }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{ med.duration or '-' }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{ med.timing or '-' }}</td>
+                    </tr>
+                    {% if med.instructions %}
+                    <tr>
+                        <td colspan="5"
+                            style="padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-size: 0.875rem; color: #6b7280;">
+                            <em>📝 {{ med.instructions }}</em>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Medical Tests -->
+    {% if prescription.medical_tests %}
+    <div class="card" style="margin-top: 1.5rem;">
+        <h2>🔬 Medical Tests ({{ prescription.medical_tests|length }})</h2>
+        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+            {% for test in prescription.medical_tests %}
+            <li
+                style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                <span>
+                    <strong>{{ test.test_name }}</strong>
+                    {% if test.instructions %}
+                    <br><span style="font-size: 0.875rem; color: #6b7280;">{{ test.instructions }}</span>
+                    {% endif %}
+                </span>
+                <span
+                    style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem;">
+                    {{ test.status or 'Pending' }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Prescription Image -->
+    <div class="card" style="margin-top: 1.5rem;">
+        <h2>🖼️ Prescription Image</h2>
+        <div style="margin-top: 1rem; text-align: center;">
+            {% set ext = prescription.image_path.rsplit('.', 1)[-1].lower() %}
+            {% if ext == 'pdf' %}
+            <p style="padding: 2rem; background: #f3f4f6; border-radius: 8px;">
+                📄 PDF Document<br>
+                <a href="{{ url_for('static', filename='uploads/' + prescription.image_path) }}"
+                    class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;" target="_blank">
+                    View PDF
+                </a>
+            </p>
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/' + prescription.image_path) }}" alt="Prescription Image"
+                style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- OCR Extracted Text (Collapsible) -->
+    <div class="card" style="margin-top: 1.5rem;">
+        <details>
+            <summary style="cursor: pointer; font-weight: 600; font-size: 1.25rem;">📄 Raw OCR Text</summary>
+            {% if prescription.ocr_text %}
+            <pre
+                style="background: #f9fafb; padding: 1rem; border-radius: 8px; white-space: pre-wrap; font-family: monospace; margin-top: 1rem; max-height: 300px; overflow-y: auto;">{{ prescription.ocr_text }}</pre>
+            {% else %}
+            <p style="color: #6b7280; padding: 1rem; background: #fef3c7; border-radius: 8px; margin-top: 1rem;">
+                ⏳ OCR text not available.
+            </p>
+            {% endif %}
+        </details>
+    </div>
+
+    <!-- Details -->
+    <div class="card" style="margin-top: 1.5rem;">
+        <h2>ℹ️ Details</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <tr>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 500;">Upload Date</td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{ prescription.upload_date.strftime('%B
+                    %d, %Y at %I:%M %p') }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 500;">File Type</td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">{{ ext.upper() }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; font-weight: 500;">Medicines Found</td>
+                <td style="padding: 0.75rem;">{{ prescription.medicines|length }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; font-weight: 500;">Tests Found</td>
+                <td style="padding: 0.75rem;">{{ prescription.medical_tests|length }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Dashboard</a>
+        <a href="{{ url_for('history') }}" class="btn btn-secondary">View All Prescriptions</a>
+
+        <form action="{{ url_for('delete_prescription', prescription_id=prescription.prescription_id) }}" method="POST"
+            style="display: inline;"
+            onsubmit="return confirm('Are you sure you want to PERMANENTLY delete this prescription? This cannot be undone.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn" style="background-color: #ef4444; color: white;">Delete
+                Prescription</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
