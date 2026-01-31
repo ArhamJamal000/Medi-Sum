@@ -1,1 +1,1 @@
-#https://github.com/ArhanJamal000/Medi-Sum.git
+https://github.com/ArhanJamal000/Medi-Sum.git
