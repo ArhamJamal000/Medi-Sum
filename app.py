@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import logging
 from typing import Optional
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Load environment variables
 load_dotenv()
@@ -50,8 +51,12 @@ def get_next_api_key():
     Get the next available Gemini API key.
     Returns (key, key_index) or (None, -1) if all keys exhausted.
     """
-    global _current_key_index
+    global _current_key_index, _api_keys
     
+    # Lazy refresh: If no keys found yet, try loading again (fixes startup timing issues)
+    if not _api_keys:
+        _api_keys = get_gemini_api_keys()
+        
     if not _api_keys:
         return None, -1
     
@@ -89,15 +94,28 @@ def get_api_key_status():
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Apply ProxyFix for correct scheme/host detection behind HF Spaces proxy
+# This ensures url_for() generates https:// links and Secure cookies work
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+# Production Security Headers
+# Check for FLASK_ENV or if we are running on Hugging Face Spaces (SPACE_ID is always set there)
+if os.environ.get('FLASK_ENV') == 'production' or os.environ.get('SPACE_ID'):
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Required for iframed Spaces
+    app.config['PERMANENT_SESSION_LIFETIME'] = 3600 # 1 hour session
+    logger.info("Production/HF Spaces detected: Enabled Secure/SameSite=None cookies")
+
 # Strict Secret Key check for production
 if os.environ.get('FLASK_ENV') == 'production' and not os.environ.get('SECRET_KEY'):
     logger.warning("WARNING: FLASK_ENV is production but SECRET_KEY is not set!")
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 # Hybrid Database Config: PostgreSQL (Prod) or SQLite (Dev)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///medisum.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 # Fix for some Postgres providers (Heroku/Render) that use 'postgres://' instead of 'postgresql://'
-if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
+if app.config.get('SQLALCHEMY_DATABASE_URI') and app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
     app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -125,6 +143,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False)  # 'patient' or 'doctor'
+    phone_number = db.Column(db.String(20))
+    sms_enabled = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationship to prescriptions
@@ -1263,7 +1283,10 @@ def chat_api():
             key_index = -1  # Dedicated key, no rotation needed
 
         if not chat_api_key:
-            return jsonify({'error': 'AI service temporarily unavailable'}), 503
+            # Debug logging for deployment issues
+            logger.error(f"Chat API failed: No keys found. GEMINI_CHAT_API_KEY set? {bool(os.getenv('GEMINI_CHAT_API_KEY'))}")
+            logger.error(f"Fallback rotation status: {get_api_key_status()}")
+            return jsonify({'error': 'AI service temporarily unavailable (Check Logs: No API Keys found)'}), 503
         
         # Build context from user's prescriptions
         prescriptions = Prescription.query.filter_by(user_id=current_user.user_id)\
@@ -1380,6 +1403,29 @@ def init_db():
     with app.app_context():
         db.create_all()
         logger.info("Database initialized!")
+
+
+@app.route('/debug/config')
+@login_required
+def debug_config():
+    """Debug endpoint to check if Env Vars are actually loaded."""
+    if not current_user.is_authenticated: # Double check
+        return "Unauthorized", 403
+        
+    env_vars = {}
+    # Check specific keys we care about
+    keys_to_check = ['GEMINI_API_KEY', 'GEMINI_API_KEYS', 'GEMINI_CHAT_API_KEY', 'SECRET_KEY', 'DATABASE_URL', 'SPACE_ID']
+    
+    for key in keys_to_check:
+        value = os.getenv(key)
+        if value:
+            # Mask the value, show only first 4 chars
+            masked = value[:4] + "..." + value[-4:] if len(value) > 8 else "***"
+            env_vars[key] = f"PRESENT ({len(value)} chars) -> {masked}"
+        else:
+            env_vars[key] = "MISSING ❌"
+            
+    return jsonify(env_vars)
 
 
 if __name__ == '__main__':
