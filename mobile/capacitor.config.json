@@ -1,0 +1,34 @@
+{
+  "appId": "com.medisum.app",
+  "appName": "Medi-Sum",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "plugins": {
+    "Camera": {
+      "presentationStyle": "fullscreen"
+    },
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#00e5ff"
+    }
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": "release.keystore",
+      "keystoreAlias": "medisum"
+    }
+  },
+  "ios": {
+    "scheme": "MediSum"
+  }
+}

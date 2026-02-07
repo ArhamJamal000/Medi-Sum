@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#F5F7FA">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Medi-Sum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script type="module" crossorigin src="/assets/main-C168_Jqe.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-DpIotxJQ.css">
+</head>
+
+<body>
+    <!-- App Container -->
+    <div id="app">
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading-screen">
+            <div class="spinner"></div>
+            <p>Loading Medi-Sum...</p>
+        </div>
+
+        <!-- Auth Container (Login/Register) -->
+        <div id="auth-container" class="hidden">
+            <!-- Login Form -->
+            <div id="login-view" class="auth-view">
+                <div class="auth-header">
+                    <div class="logo-circle pulse"></div>
+                    <h1>Medi-Sum</h1>
+                    <p>Your Medical Co-Pilot</p>
+                </div>
+                <form id="login-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required placeholder="you@example.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">Log In</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-view" class="auth-view hidden">
+                <div class="auth-header">
+                    <div class="logo-circle pulse"></div>
+                    <h1>Create Account</h1>
+                </div>
+                <form id="register-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="register-name">Full Name</label>
+                        <input type="text" id="register-name" required placeholder="John Doe">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required placeholder="you@example.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required minlength="6" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">Create Account</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="#" id="show-login">Log In</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App Container (after login) -->
+        <div id="main-container" class="hidden">
+            <!-- Status Bar Spacer -->
+            <div class="status-bar-spacer"></div>
+
+            <!-- Main Content Area -->
+            <main id="main-content">
+                <!-- Pages will be loaded here dynamically -->
+            </main>
+
+            <!-- Bottom Navigation -->
+            <nav class="bottom-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="nav-item" data-page="scan">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="7" y1="8" x2="17" y2="8"></line>
+                        <line x1="7" y1="12" x2="17" y2="12"></line>
+                        <line x1="7" y1="16" x2="13" y2="16"></line>
+                    </svg>
+                    <span>Scan</span>
+                </a>
+                <a href="#" class="nav-item" data-page="pharma">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                    </svg>
+                    <span>Pharma</span>
+                </a>
+                <a href="#" class="nav-item" data-page="timeline">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="2" x2="12" y2="22"></line>
+                        <circle cx="12" cy="5" r="3"></circle>
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <circle cx="12" cy="19" r="3"></circle>
+                    </svg>
+                    <span>History</span>
+                </a>
+                <a href="#" class="nav-item" data-page="profile">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Profile</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+</body>
+
+</html>
