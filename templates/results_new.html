@@ -1,0 +1,1061 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescription Details - Medi-Sum{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 25px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Row 1: Heading */
+    .heading-row {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .main-title {
+        font-size: 26px;
+        margin: 0 0 8px 0;
+        color: var(--color-storm-grey);
+        font-weight: bold;
+    }
+
+    .heading-meta {
+        font-size: 14px;
+        color: var(--color-cool-grey);
+        font-weight: 500;
+    }
+
+    /* Row 2: Main Grid - 2 Column Layout */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 32% 68%;
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .left-column, .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* Enhanced Card Design */
+    .card {
+        background: var(--color-white);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Card Header Strips */
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+
+    .medicines-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+
+    .key-details-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .tests-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    }
+
+    .visit-reason-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #ef4444, #f87171);
+    }
+
+    .summary-card {
+        padding: 20px;
+    }
+
+    .summary-card h2 {
+        font-size: 28px;
+        margin: 0 0 16px 0;
+        color: var(--color-storm-grey);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+    }
+
+    .summary-tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: help;
+    }
+
+    .summary-tooltip .tooltip-text {
+        visibility: hidden;
+        width: 250px;
+        background-color: var(--color-storm-grey);
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 8px 12px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -125px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .summary-tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .summary-content {
+        line-height: 1.6;
+        color: var(--color-storm-grey);
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    .summary-bullets {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .summary-bullets li {
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+    }
+
+    .summary-bullets li:before {
+        content: "•";
+        color: var(--color-electric-cyan);
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+    }
+
+    .last-updated {
+        font-size: 12px;
+        color: var(--color-cool-grey);
+        margin-top: 12px;
+        font-style: italic;
+    }
+
+    .image-preview {
+        text-align: center;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        height: auto;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        object-fit: contain;
+    }
+
+    .image-preview img:hover {
+        transform: scale(1.02);
+    }
+
+    .image-preview .label {
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--color-cool-grey);
+        font-weight: 500;
+    }
+
+    .key-details-card h3 {
+        font-size: 20px;
+        margin: 0 0 16px 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: var(--color-storm-grey);
+    }
+
+    .detail-value {
+        color: var(--color-electric-cyan);
+        font-weight: 600;
+    }
+
+    .medicines-card {
+        padding: 15px;
+    }
+
+    .medicines-card h3,
+    .timeline-card h3,
+    .tests-card h3 {
+        font-size: 20px;
+        margin: 0 0 15px 0;
+        color: var(--color-storm-grey);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+    }
+
+    .medicine-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid #f3f4f6;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        transition: all 0.2s;
+        line-height: 1.4;
+    }
+
+    .medicine-item:hover {
+        border-color: var(--color-electric-cyan);
+        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.1);
+    }
+
+    .medicine-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    .medicine-details {
+        font-size: 14px;
+        color: var(--color-cool-grey);
+        font-weight: 500;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border-left: 3px solid var(--color-electric-cyan);
+        background: #f8fafc;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 12px;
+    }
+
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--color-electric-cyan);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+    }
+
+    .timeline-content h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    .timeline-content p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--color-cool-grey);
+        font-weight: 500;
+    }
+
+    .test-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        border: 1px solid #f3f4f6;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
+
+    .test-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    .test-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+    }
+
+    .modal-content {
+        margin: 5% auto;
+        max-width: 90%;
+        max-height: 90%;
+        display: block;
+        border-radius: 12px;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .modal-caption {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        background: rgba(0,0,0,0.7);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            max-width: 100%;
+            padding: 0 12px;
+        }
+
+        .dashboard-main {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .left-column,
+        .right-column {
+            gap: 20px;
+        }
+
+        .patient-info,
+        .card {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .patient-info h1 {
+            font-size: 24px;
+            line-height: 1.3;
+        }
+
+        .summary-card h2 {
+            font-size: 20px;
+        }
+
+        .key-details-card h3 {
+            font-size: 18px;
+        }
+
+        .medicines-card h3,
+        .timeline-card h3,
+        .tests-card h3 {
+            font-size: 18px;
+        }
+
+        .medicine-item,
+        .test-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .timeline-item {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .timeline-icon {
+            align-self: flex-start;
+        }
+
+        .detail-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+    }
+
+    /* Loading spinner */
+    .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid var(--color-electric-cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Actions Section Styles */
+    .actions-section {
+        margin-top: 60px;
+        margin-bottom: 40px;
+    }
+
+    .actions-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .actions-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+
+    .actions-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--color-electric-cyan), var(--color-neon-mint), #3b82f6);
+    }
+
+    .actions-card h3 {
+        font-size: 20px;
+        margin: 0 0 24px 0;
+        color: var(--color-storm-grey);
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+        min-height: 44px;
+    }
+
+    .action-btn.btn-primary {
+        background-color: var(--color-electric-cyan);
+        color: white;
+        box-shadow: 0 4px 14px var(--color-electric-cyan-40);
+    }
+
+    .action-btn.btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--color-electric-cyan-60);
+    }
+
+    .action-btn.btn-secondary {
+        background-color: var(--color-neon-mint);
+        color: white;
+        box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+    }
+
+    .action-btn.btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.6);
+    }
+
+    .action-btn.btn-outline {
+        background-color: transparent;
+        color: var(--color-electric-cyan);
+        border: 2px solid var(--color-electric-cyan);
+    }
+
+    .action-btn.btn-outline:hover {
+        background-color: var(--color-electric-cyan);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .action-btn.btn-danger {
+        background-color: #ef4444;
+        color: white;
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+
+    .action-btn.btn-danger:hover {
+        background-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+    }
+
+    /* Mobile responsive for action buttons */
+    @media (max-width: 768px) {
+        .actions-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+    }
+
+    /* New classes for no inline styles */
+    .visit-reason {
+        margin-top: 16px;
+        padding: 12px;
+        background: #f0f9ff;
+        border-radius: 8px;
+        border-left: 3px solid var(--color-electric-cyan);
+    }
+
+    .medicine-instructions {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--color-cool-grey);
+        font-style: italic;
+    }
+
+    /* Medicine Tags */
+    .dosage-tag, .frequency-tag, .timing-tag, .duration-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        margin: 2px 4px 2px 0;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .dosage-tag {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .frequency-tag {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .timing-tag {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .duration-tag {
+        background: #f3e8ff;
+        color: #6b21a8;
+    }
+
+    .pdf-placeholder {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 2px dashed #e5e7eb;
+    }
+
+    .pdf-placeholder .pdf-content {
+        text-align: center;
+    }
+
+    .pdf-placeholder .icon {
+        font-size: 48px;
+        margin-bottom: 8px;
+    }
+
+    .pdf-placeholder .text {
+        font-size: 16px;
+        color: var(--color-cool-grey);
+    }
+
+    .pdf-link {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 8px 16px;
+        background: var(--color-electric-cyan);
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .no-medicines, .no-tests {
+        text-align: center;
+        padding: 40px;
+        color: var(--color-cool-grey);
+    }
+
+    .no-medicines .icon, .no-tests .icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    /* Key Details Grid */
+    .key-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .key-details-grid .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .key-details-grid .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .key-details-grid .detail-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--color-cool-grey);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .key-details-grid .detail-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--color-electric-cyan);
+    }
+
+    /* Meta Items */
+    .meta-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .meta-item:last-child {
+        border-bottom: none;
+    }
+
+    .meta-label {
+        font-weight: 500;
+        color: var(--color-storm-grey);
+        font-size: 14px;
+    }
+
+    .meta-value {
+        color: var(--color-electric-cyan);
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .prescription-title {
+        text-align: left;
+    }
+
+    .prescription-title h1 {
+        font-size: 32px;
+        margin: 0 0 8px 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    .prescription-title .meta {
+        color: var(--color-cool-grey);
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    /* Mobile adjustments for prescription title */
+    @media (max-width: 768px) {
+        .prescription-title h1 {
+            font-size: 24px;
+            line-height: 1.3;
+        }
+    }
+
+    /* Mobile Responsive Updates */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            max-width: 100%;
+            padding: 0 12px;
+        }
+
+        .heading-row {
+            margin-bottom: 20px;
+        }
+
+        .main-title {
+            font-size: 24px;
+        }
+
+        .main-grid, .secondary-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .left-column, .right-column {
+            gap: 20px;
+        }
+
+        .card {
+            padding: 16px;
+        }
+
+        .summary-card h2 {
+            font-size: 20px;
+        }
+
+        .key-details-card h3,
+        .medicines-card h3,
+        .tests-card h3,
+        .visit-reason-card h3 {
+            font-size: 18px;
+        }
+
+        .key-details-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .key-details-grid .detail-item {
+            padding: 12px 0;
+        }
+
+        .key-details-grid .detail-value {
+            font-size: 16px;
+        }
+
+        .medicine-item, .test-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .detail-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .meta-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .actions-section {
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Row 1: Heading -->
+    <div class="heading-row">
+        <h1 class="main-title">Prescription #{{ prescription.prescription_id }} – Visit Reason: {{ prescription.visit_reason or 'N/A' }}</h1>
+        <div class="heading-meta">
+            {% if prescription.prescription_date %}
+            Date: {{ prescription.prescription_date.strftime('%B %d, %Y') }} |
+            {% endif %}
+            Uploaded: {{ prescription.upload_date.strftime('%B %d, %Y at %I:%M %p') }}
+        </div>
+    </div>
+
+    <!-- Row 2: Main Grid -->
+    <div class="main-grid">
+        <!-- Left Column: Prescription Preview + Key Details + Tests -->
+        <div class="left-column">
+            <div class="image-preview card">
+                {% set ext = prescription.image_path.rsplit('.', 1)[-1].lower() %}
+                {% if ext == 'pdf' %}
+                <div class="pdf-placeholder">
+                    <div class="pdf-content">
+                        <div class="icon">📄</div>
+                        <div class="text">PDF Document</div>
+                        <a href="{{ url_for('static', filename='uploads/' + prescription.image_path) }}" target="_blank" class="pdf-link">View PDF</a>
+                    </div>
+                </div>
+                {% else %}
+                <img src="{{ url_for('static', filename='uploads/' + prescription.image_path) }}" alt="Prescription Preview" id="prescription-image">
+                {% endif %}
+                <div class="label">Prescription Preview</div>
+            </div>
+
+            <!-- Key Details Card -->
+            <div class="key-details-card card">
+                <h3>📊 Key Details</h3>
+                <div class="key-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Medicines</span>
+                        <span class="detail-value">{{ prescription.medicines|length }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tests</span>
+                        <span class="detail-value">{{ prescription.medical_tests|length }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duration</span>
+                        <span class="detail-value">
+                            {% set durations = [] %}
+                            {% for med in prescription.medicines %}
+                            {% if med.duration and med.duration not in durations %}
+                            {% set _ = durations.append(med.duration) %}
+                            {% endif %}
+                            {% endfor %}
+                            {{ durations|join(', ') or 'N/A' }}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">File Type</span>
+                        <span class="detail-value">{{ ext.upper() }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tests & Alerts Card -->
+            <div class="tests-card card">
+                <h3>🔬 Tests & Alerts ({{ prescription.medical_tests|length }})</h3>
+                {% if prescription.medical_tests %}
+                {% for test in prescription.medical_tests %}
+                <div class="test-item">
+                    <div class="test-info">
+                        <h4>{{ test.test_name }}</h4>
+                        {% if test.instructions %}
+                        <div style="font-size: 13px; color: var(--color-cool-grey); margin-top: 4px;">
+                            {{ test.instructions }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <span class="test-status status-{{ test.status.lower() }}">
+                        {{ test.status.title() }}
+                    </span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="no-tests">
+                    <div class="icon">🔬</div>
+                    <p>No tests or alerts found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column: AI Summary + Medicines -->
+        <div class="right-column">
+            <!-- AI Summary Card -->
+            <div class="summary-card card">
+                <h2>📋 AI Summary</h2>
+                <div id="summary-content" class="summary-content">
+                    {% if prescription.patient_summary %}
+                    <ul class="summary-bullets">
+                        {% for line in prescription.patient_summary.split('\n') %}
+                        {% if line.strip() %}
+                        <li>{{ line.strip() }}</li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p style="color: var(--color-cool-grey); font-style: italic;">No patient summary available</p>
+                    {% endif %}
+                </div>
+                <div class="last-updated">
+                    Last Updated: {{ prescription.upload_date.strftime('%B %d, %Y at %I:%M %p') }}
+                </div>
+            </div>
+
+            <!-- Medicines Card -->
+            <div class="medicines-card card">
+                <h3>💊 Medicines ({{ prescription.medicines|length }})</h3>
+                {% if prescription.medicines %}
+                {% for med in prescription.medicines %}
+                <div class="medicine-item">
+                    <div class="medicine-info">
+                        <h4>{{ med.name }}</h4>
+                        <div class="medicine-details">
+                            {% if med.dosage %}<span class="dosage-tag">{{ med.dosage }}</span>{% endif %}
+                            {% if med.frequency %}<span class="frequency-tag">{{ med.frequency }}</span>{% endif %}
+                            {% if med.timing %}<span class="timing-tag">{{ med.timing }}</span>{% endif %}
+                            {% if med.duration %}<span class="duration-tag">{{ med.duration }}</span>{% endif %}
+                        </div>
+                        {% if med.instructions %}
+                        <div class="medicine-instructions">📝 {{ med.instructions }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="no-medicines">
+                    <div class="icon">💊</div>
+                    <p>No medicines detected in this prescription</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Row 4: Bottom Section -->
+    <div class="actions-section">
+        <div class="actions-card card">
+            <h3>Actions</h3>
+            <div class="actions-grid">
+                <a href="{{ url_for('export_dashboard_pdf', prescription_id=prescription.prescription_id) }}" class="action-btn btn-primary">
+                    📄 Download PDF
+                </a>
+                <button class="action-btn btn-secondary" onclick="sharePrescription()">
+                    📤 Share
+                </button>
+                <a href="{{ url_for('history') }}" class="action-btn btn-outline">
+                    📋 View History
+                </a>
+                <form method="POST" action="{{ url_for('delete_prescription', prescription_id=prescription.prescription_id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this prescription?')">
+                    <button type="submit" class="action-btn btn-danger">
+                        🗑️ Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div id="image-modal" class="modal">
+    <span class="modal-close" id="modal-close">&times;</span>
+    <img class="modal-content" id="modal-image">
+    <div class="modal-caption">Analyzed Prescription</div>
+</div>
+
+<script>
+// Image modal functionality
+document.getElementById('prescription-image').addEventListener('click', function() {
+    const modal = document.getElementById('image-modal');
+    const modalImg = document.getElementById('modal-image');
+    modal.style.display = 'block';
+    modalImg.src = this.src;
+});
+
+document.getElementById('modal-close').addEventListener('click', function() {
+    document.getElementById('image-modal').style.display = 'none';
+});
+
+// Close modal when clicking outside
+document.getElementById('image-modal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        this.style.display = 'none';
+    }
+});
+</script>
+
+{% endblock %}
