@@ -1,16 +1,16 @@
-# Use Python 3.10 slim image for better compatibility
-FROM python:3.10-slim
+# Use Python 3.10 Bookworm (stable Debian 12) for better compatibility
+FROM python:3.10-bookworm
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (Tesseract OCR + GL libraries)
-# Combine apt-get update and install to keep layer small
-# Added --no-install-recommends to reduce image size
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies
+# Using full bookworm image avoids some 'slim' missing package issues
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     libgl1-mesa-glx \
     libglib2.0-0 \
+    python3-dev \
     libpq-dev \
     gcc \
     && rm -rf /var/lib/apt/lists/*
