@@ -287,6 +287,12 @@ def index():
     return render_template('landing.html')
 
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for potential uptime monitoring."""
+    return 'OK', 200
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """User login page."""

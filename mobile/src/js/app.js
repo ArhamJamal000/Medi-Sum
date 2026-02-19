@@ -189,21 +189,25 @@ async function renderDashboard() {
             </div>
         </header>
 
-        <!-- Stats Row (v1.3) -->
+        <!-- Stats Row (v1.3 Premium) -->
         <div class="dashboard-stats animate-fade-in stagger-1">
             <div class="stat-card-white" onclick="navigate('timeline', 'medicine')">
+                <div style="font-size: 24px; margin-bottom: 4px;">💊</div>
                 <div class="stat-value">${data.stats.medicines}</div>
                 <div class="stat-label">Meds</div>
             </div>
             <div class="stat-card-white" onclick="navigate('timeline', 'test')">
+                <div style="font-size: 24px; margin-bottom: 4px;">🧪</div>
                 <div class="stat-value">${data.stats.tests}</div>
                 <div class="stat-label">Tests</div>
             </div>
             <div class="stat-card-white" onclick="navigate('timeline', 'prescription')">
+                <div style="font-size: 24px; margin-bottom: 4px;">📝</div>
                 <div class="stat-value">${data.stats.prescriptions}</div>
                 <div class="stat-label">Rx</div>
             </div>
             <div class="stat-card-white" onclick="navigate('timeline', 'report')">
+                <div style="font-size: 24px; margin-bottom: 4px;">📄</div>
                 <div class="stat-value">${data.stats.reports}</div>
                 <div class="stat-label">Reports</div>
             </div>

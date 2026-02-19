@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medi-Sum — Project Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --card: #1a1a2e;
+            --accent: #00d4aa;
+            --accent2: #7c5cfc;
+            --text: #e0e0e0;
+            --text-dim: #888;
+            --slide-width: 100vw;
+            --slide-height: 100vh;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .slide {
+            width: var(--slide-width);
+            height: var(--slide-height);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 80px;
+            position: relative;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Slide number */
+        .slide-number {
+            position: absolute;
+            bottom: 24px;
+            right: 40px;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav button {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid #333;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav button:hover {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        /* Common slide styles */
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--accent);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent2);
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .content {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .content ul li {
+            font-size: 1.15rem;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            line-height: 1.5;
+        }
+
+        .content ul li:last-child {
+            border-bottom: none;
+        }
+
+        .content ul li .icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .tag.purple {
+            background: var(--accent2);
+            color: #fff;
+        }
+
+        .tag.orange {
+            background: #ff8c00;
+            color: #000;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .card ul li {
+            font-size: 1rem;
+            padding: 6px 0;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .accent2 {
+            color: var(--accent2);
+        }
+
+        /* Slide 1 — Intro */
+        .intro-badge {
+            background: var(--card);
+            border: 1px solid #333;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+
+        .intro h1 {
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .intro .subtitle {
+            font-size: 1.4rem;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .team-info {
+            margin-top: 32px;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        /* Thank you slide */
+        .thankyou h1 {
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .thankyou .subtitle {
+            font-size: 1.3rem;
+            margin-top: 8px;
+        }
+
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .flow-step {
+            background: var(--card);
+            border: 1px solid #2a2a3e;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .status-done {
+            color: var(--accent);
+        }
+
+        .status-progress {
+            color: #ff8c00;
+        }
+
+        /* Progress bar style */
+        .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .progress-label {
+            font-size: 1rem;
+            width: 200px;
+            flex-shrink: 0;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 10px;
+            background: #222;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+
+        .progress-pct {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            width: 50px;
+            text-align: right;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==================== SLIDE 1: INTRO ==================== -->
+    <div class="slide intro active" id="slide-1">
+        <div class="intro-badge">📋 Final Year Project — Progress Demo</div>
+        <h1>Medi-Sum</h1>
+        <p class="subtitle">A smart prescription manager that reads your prescriptions using AI and keeps your medical
+            history organized.</p>
+        <div class="team-info">
+            Project Demo • February 2026
+        </div>
+        <span class="slide-number">1 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 2: WHAT IS MEDI-SUM ==================== -->
+    <div class="slide" id="slide-2">
+        <div class="content">
+            <h2>What is Medi-Sum?</h2>
+            <p class="subtitle" style="margin-bottom: 32px;">The problem we're solving and what we built</p>
+            <ul>
+                <li><span class="icon">😤</span> <span><strong>Problem:</strong> Prescriptions are hard to read and easy
+                        to lose. You forget medicine names, dosages, and old test results.</span></li>
+                <li><span class="icon">💡</span> <span><strong>Our Solution:</strong> Upload a prescription photo → AI
+                        reads it → extracts medicines, tests, and summaries → saves everything in one place.</span></li>
+                <li><span class="icon">🎯</span> <span><strong>Who it's for:</strong> Patients who want a simple way to
+                        track their medicines and medical history.</span></li>
+                <li><span class="icon">🛠️</span> <span><strong>Tech:</strong> Flask (Python) + Google Gemini AI +
+                        SQLite + Mobile App (React Native/Expo)</span></li>
+            </ul>
+        </div>
+        <span class="slide-number">2 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 3: HOW IT WORKS ==================== -->
+    <div class="slide" id="slide-3">
+        <div class="content">
+            <h2>How It Works</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">The full flow from upload to results</p>
+            <div class="flow-steps">
+                <div class="flow-step">📸 Take Photo / Upload PDF</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">🤖 Gemini AI reads the text (OCR)</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">📊 AI extracts medicines & tests</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">📝 AI writes a summary</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">💾 Saved to your database</div>
+            </div>
+            <div style="margin-top: 40px;">
+                <ul>
+                    <li><span class="icon">🔄</span> <span><strong>Fallback OCR:</strong> If Gemini can't read it, we
+                            use TrOCR (Microsoft's handwriting model) as backup.</span></li>
+                    <li><span class="icon">🔑</span> <span><strong>API Key Rotation:</strong> We use 10+ API keys and
+                            auto-switch when one runs out of quota. No downtime.</span></li>
+                    <li><span class="icon">📄</span> <span><strong>Supports:</strong> JPG, PNG images and PDF
+                            files.</span></li>
+                </ul>
+            </div>
+        </div>
+        <span class="slide-number">3 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 4: AUTHENTICATION ==================== -->
+    <div class="slide" id="slide-4">
+        <div class="content">
+            <h2>Authentication & Security</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">Keeping user data safe</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🔐 Login & Registration</h3>
+                    <ul>
+                        <li><span class="icon">✅</span> Email + password signup</li>
+                        <li><span class="icon">✅</span> Password hashing (Werkzeug)</li>
+                        <li><span class="icon">✅</span> Flask-Login session management</li>
+                        <li><span class="icon">✅</span> Secure logout</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🛡️ Security Measures</h3>
+                    <ul>
+                        <li><span class="icon">✅</span> CSRF tokens on all forms</li>
+                        <li><span class="icon">✅</span> SQL injection prevention (ORM)</li>
+                        <li><span class="icon">✅</span> File upload validation</li>
+                        <li><span class="icon">✅</span> JWT tokens for mobile API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <span class="slide-number">4 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 5: AI EXTRACTION ==================== -->
+    <div class="slide" id="slide-5">
+        <div class="content">
+            <h2>AI — What It Extracts</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">From messy prescription to clean data</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>💊 Medicines</h3>
+                    <ul>
+                        <li><span class="icon">•</span> Medicine name</li>
+                        <li><span class="icon">•</span> Dosage (e.g., 500mg)</li>
+                        <li><span class="icon">•</span> Frequency (e.g., twice a day)</li>
+                        <li><span class="icon">•</span> Duration (e.g., 7 days)</li>
+                        <li><span class="icon">•</span> Timing & instructions</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🧪 Tests & Summaries</h3>
+                    <ul>
+                        <li><span class="icon">•</span> Test names & status</li>
+                        <li><span class="icon">•</span> Test instructions</li>
+                        <li><span class="icon">•</span> "Key Insights" — one-liner summary</li>
+                        <li><span class="icon">•</span> "Visit Reason" — auto title</li>
+                        <li><span class="icon">•</span> Patient summary — detailed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <span class="slide-number">5 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 6: DASHBOARD ==================== -->
+    <div class="slide" id="slide-6">
+        <div class="content">
+            <h2>Dashboard</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">Everything at a glance</p>
+            <ul>
+                <li><span class="icon">📊</span> <span><strong>Quick Stats:</strong> Total prescriptions, medicines,
+                        tests, and pending tests — all in one view.</span></li>
+                <li><span class="icon">⚠️</span> <span><strong>Active Alerts:</strong> Shows medicines you're currently
+                        taking and tests still pending.</span></li>
+                <li><span class="icon">📰</span> <span><strong>Recent Activity:</strong> Latest uploads and actions in a
+                        feed.</span></li>
+                <li><span class="icon">💉</span> <span><strong>Health Vitals:</strong> Track BP and sugar levels daily
+                        with charts (Chart.js).</span></li>
+            </ul>
+        </div>
+        <span class="slide-number">6 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 7: TIMELINE & HISTORY ==================== -->
+    <div class="slide" id="slide-7">
+        <div class="content">
+            <h2>Timeline & History</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">Your medical journey, organized by date</p>
+            <ul>
+                <li><span class="icon">📅</span> <span><strong>Medical Timeline:</strong> Visual, chronological view of
+                        all prescriptions — grouped by month/year with sticky headers.</span></li>
+                <li><span class="icon">🏥</span> <span><strong>Auto Icons:</strong> Visits get 🏥, tests get 🧪 — the
+                        system figures it out automatically.</span></li>
+                <li><span class="icon">✨</span> <span><strong>Latest First:</strong> Most recent event gets a pulse
+                        animation so you notice it right away.</span></li>
+                <li><span class="icon">📋</span> <span><strong>History Page:</strong> Simple list of all prescriptions
+                        with options to view or delete.</span></li>
+            </ul>
+        </div>
+        <span class="slide-number">7 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 8: CHATBOT ==================== -->
+    <div class="slide" id="slide-8">
+        <div class="content">
+            <h2>AI Health Assistant (Chatbot)</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">Ask questions about your prescriptions</p>
+            <ul>
+                <li><span class="icon">🤖</span> <span><strong>RAG-based:</strong> The chatbot answers using YOUR
+                        prescription data only — it doesn't make stuff up.</span></li>
+                <li><span class="icon">💬</span> <span><strong>Example questions:</strong> "What medicines am I
+                        taking?", "When was my last blood test?", "What did the doctor say last visit?"</span></li>
+                <li><span class="icon">🌐</span> <span><strong>Multilingual:</strong> Works in English, Hindi, Tamil,
+                        Telugu, Bengali, and Marathi.</span></li>
+                <li><span class="icon">🔑</span> <span><strong>Separate API key:</strong> Chat has its own API quota so
+                        it doesn't affect prescription uploads.</span></li>
+            </ul>
+        </div>
+        <span class="slide-number">8 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 9: MOBILE APP ==================== -->
+    <div class="slide" id="slide-9">
+        <div class="content">
+            <h2>Mobile App</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">Same features, on your phone</p>
+            <ul>
+                <li><span class="icon">📱</span> <span><strong>Built with:</strong> React Native + Expo — works on
+                        Android (APK available).</span></li>
+                <li><span class="icon">🔗</span> <span><strong>Connects to:</strong> Same Flask backend via REST API
+                        with JWT authentication.</span></li>
+                <li><span class="icon">📸</span> <span><strong>Camera Upload:</strong> Take a photo of your prescription
+                        directly from the app.</span></li>
+                <li><span class="icon">🔄</span> <span><strong>Multiple versions built:</strong> v1.1 → v1.3, improving
+                        UI and fixing bugs along the way.</span></li>
+            </ul>
+        </div>
+        <span class="slide-number">9 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 10: TECH STACK & STATUS ==================== -->
+    <div class="slide" id="slide-10">
+        <div class="content">
+            <h2>Tech Stack & Progress</h2>
+            <p class="subtitle" style="margin-bottom: 28px;">What we used and where things stand</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🧰 Tech Stack</h3>
+                    <ul>
+                        <li><span class="icon">•</span> <strong>Backend:</strong> Flask (Python)</li>
+                        <li><span class="icon">•</span> <strong>AI:</strong> Google Gemini API</li>
+                        <li><span class="icon">•</span> <strong>Fallback OCR:</strong> TrOCR</li>
+                        <li><span class="icon">•</span> <strong>Database:</strong> SQLite + SQLAlchemy</li>
+                        <li><span class="icon">•</span> <strong>Mobile:</strong> React Native / Expo</li>
+                        <li><span class="icon">•</span> <strong>Deploy:</strong> Docker ready</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>📈 Current Status</h3>
+                    <ul>
+                        <li><span class="icon">✅</span> Auth — done</li>
+                        <li><span class="icon">✅</span> Upload & OCR — done</li>
+                        <li><span class="icon">✅</span> AI extraction — done</li>
+                        <li><span class="icon">✅</span> Dashboard — done</li>
+                        <li><span class="icon">✅</span> Timeline — done</li>
+                        <li><span class="icon">✅</span> Chatbot — done</li>
+                        <li><span class="icon">✅</span> Mobile app — done</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <span class="slide-number">10 / 11</span>
+    </div>
+
+    <!-- ==================== SLIDE 11: THANK YOU ==================== -->
+    <div class="slide thankyou" id="slide-11">
+        <h1>Thank You! 🙏</h1>
+        <p class="subtitle">Questions? Let's talk.</p>
+        <div style="margin-top: 40px; color: var(--text-dim); text-align: center; font-size: 0.95rem; line-height: 2;">
+            <strong style="color: var(--text);">Medi-Sum</strong> — AI-Powered Prescription Manager<br>
+            Flask • Gemini AI • React Native • SQLite
+        </div>
+        <span class="slide-number">11 / 11</span>
+    </div>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <div class="nav">
+        <button onclick="prevSlide()">← Prev</button>
+        <button onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let current = 1;
+        const total = 11;
+
+        function showSlide(n) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById('slide-' + n).classList.add('active');
+            current = n;
+        }
+
+        function nextSlide() {
+            if (current < total) showSlide(current + 1);
+        }
+
+        function prevSlide() {
+            if (current > 1) showSlide(current - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
