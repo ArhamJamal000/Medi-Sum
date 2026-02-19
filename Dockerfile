@@ -1,11 +1,13 @@
-# Use Python 3.9 slim image for a smaller footprint
-FROM python:3.9-slim
+# Use Python 3.10 slim image for better compatibility
+FROM python:3.10-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (Tesseract OCR + GL libraries for OpenCV if needed)
-RUN apt-get update && apt-get install -y \
+# Install system dependencies (Tesseract OCR + GL libraries)
+# Combine apt-get update and install to keep layer small
+# Added --no-install-recommends to reduce image size
+RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     libgl1-mesa-glx \
     libglib2.0-0 \
@@ -13,30 +15,20 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to leverage Docker cache
+# Copy requirements FIRST to leverage Docker cache
 COPY requirements.txt .
 
 # Install Python dependencies
-# Note: Installing torch/torchvision CPU version to save space/build time if GPU not needed
-# Hugging Face Spaces CPU basic tier does not have GPU
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Pre-download TrOCR model to avoid timeout on first run
-COPY download_model.py .
-RUN python download_model.py && rm download_model.py
+# Upgrade pip first
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
 
-# Create a non-root user (Hugging Face requirement for security)
-RUN useradd -m -u 1000 user
-USER user
-ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:$PATH
-
-# Expose port 7860 (Hugging Face default)
-EXPOSE 7860
+# Expose port (Render sets PORT env var, but good to doc)
+EXPOSE 10000
 
 # Command to run the application using Gunicorn
-# 2 workers recommended for free tier
-CMD ["gunicorn", "--bind", "0.0.0.0:7860", "--workers", "2", "--timeout", "120", "app:app"]
+# Bind to 0.0.0.0:$PORT (Render injects PORT)
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
