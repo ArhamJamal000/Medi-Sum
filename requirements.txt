@@ -8,9 +8,6 @@ google-generativeai==0.3.2
 Pillow==10.1.0
 email_validator==2.1.0
 gunicorn
-transformers
-torch
-torchvision
 pytesseract
 requests
 psycopg2-binary

@@ -582,9 +582,10 @@ def perform_ocr(image_path, max_retries=3, retry_delay=30):
                 else:
                     return None, f"OCR processing failed: {error_msg}"
     
-    # Use TrOCR fallback (best for handwritten prescriptions)
+    # Fallback to Tesseract if Gemini fails (TrOCR disabled for Render free tier)
     if use_fallback:
-        return perform_ocr_trocr(image_path)
+        logger.info("Falling back to Tesseract OCR...")
+        return perform_ocr_tesseract(image_path)
 
 
 @app.route('/delete_prescription/<int:prescription_id>', methods=['POST'])
