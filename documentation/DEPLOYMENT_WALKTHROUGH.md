@@ -37,7 +37,18 @@ If you need to configure manually:
 
 ## Step 4: Set Environment Variables
 
-Scroll down to the **"Environment Variables"** section and add the following keys.
+You have two options here:
+
+### **Option A: The Easy Way (Secret File)**
+1.  Click the **"Environment"** tab on your Render dashboard.
+2.  Click **"Secret Files"**.
+3.  Click **"Add Secret File"**.
+4.  **Filename**: `.env` (Must be exactly `.env`).
+5.  **Contents**: Copy-paste the entire content of your local `.env` file here.
+6.  Click **"Save Changes"**.
+
+### **Option B: The Manual Way (One by One)**
+Scroll down to the **"Environment Variables"** section and add the following keys manually.
 
 **Important**: Do NOT wrap values in quotes unless the value itself contains spaces.
 

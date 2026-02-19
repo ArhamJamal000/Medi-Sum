@@ -16,7 +16,8 @@ from flask_cors import CORS
 from functools import wraps
 
 # Load environment variables
-load_dotenv()
+load_dotenv()  # Local .env
+load_dotenv('/etc/secrets/.env')  # Render Secret File
 
 # Configure logging (replaces print statements)
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
