@@ -1796,47 +1796,114 @@ def api_get_timeline():
 
 def generate_health_summary(user_id, prescriptions, reports):
     """
-    Generate AI-powered overall health summary from all prescriptions and reports.
-    Returns a concise 2-3 sentence summary.
+    Generate AI-powered overall health summary from all prescriptions, reports, and vitals.
+    Uses Gemini to produce a comprehensive summary.
     """
     import google.generativeai as genai
     
     # If no data, return default message
     if not prescriptions and not reports:
-        return "No medical records yet. Upload prescriptions or lab reports to see your health summary."
+        return "No medical records uploaded yet. Upload your prescriptions or lab reports to generate your personalized AI health summary."
     
-    # Collect summaries from prescriptions and reports
+    # Collect ALL data points for comprehensive analysis
     data_points = []
     
-    for p in prescriptions[:5]:  # Limit to recent 5
+    # Prescriptions with full medicine + test details
+    for i, p in enumerate(prescriptions[:10]):  # Limit to recent 10
+        rx_parts = []
+        date_str = p.prescription_date.strftime('%Y-%m-%d') if p.prescription_date else 'Unknown date'
+        rx_parts.append(f"Prescription {i+1} ({date_str}):")
+        
+        if p.visit_reason:
+            rx_parts.append(f"  Visit Reason: {p.visit_reason}")
         if p.patient_summary:
-            data_points.append(f"Prescription ({p.visit_reason or 'Visit'}): {p.patient_summary}")
-        elif p.key_insights:
-            data_points.append(f"Prescription: {p.key_insights}")
+            rx_parts.append(f"  Summary: {p.patient_summary}")
+        if p.key_insights:
+            rx_parts.append(f"  Key Insights: {p.key_insights}")
+        
+        # All medicines
+        for m in p.medicines:
+            med_info = f"  Medicine: {m.name}"
+            if m.dosage: med_info += f", Dosage: {m.dosage}"
+            if m.frequency: med_info += f", Frequency: {m.frequency}"
+            if m.duration: med_info += f", Duration: {m.duration}"
+            if m.timing: med_info += f", Timing: {m.timing}"
+            if m.instructions: med_info += f", Instructions: {m.instructions}"
+            rx_parts.append(med_info)
+        
+        # All tests
+        for t in p.medical_tests:
+            test_info = f"  Test: {t.test_name}"
+            if t.instructions: test_info += f" - {t.instructions}"
+            if t.status: test_info += f" (Status: {t.status})"
+            rx_parts.append(test_info)
+        
+        data_points.append('\n'.join(rx_parts))
     
-    for r in reports[:3]:  # Limit to recent 3
+    # Lab reports
+    for r in reports[:5]:
+        report_parts = []
+        date_str = r.report_date.strftime('%Y-%m-%d') if r.report_date else 'Unknown date'
+        report_parts.append(f"Lab Report ({r.lab_name or 'Lab'}, {date_str}):")
         if r.summary:
-            data_points.append(f"Lab Report ({r.lab_name or 'Test'}): {r.summary}")
+            report_parts.append(f"  Summary: {r.summary}")
+        if r.test_results:
+            try:
+                import json as json_module
+                results = json_module.loads(r.test_results) if isinstance(r.test_results, str) else r.test_results
+                for res in results[:10]:
+                    result_line = f"  {res.get('test_name', 'Test')}: {res.get('value', '')} {res.get('unit', '')}"
+                    if res.get('flag'): result_line += f" ({res['flag']})"
+                    if res.get('range'): result_line += f" [Ref: {res['range']}]"
+                    report_parts.append(result_line)
+            except:
+                pass
+        data_points.append('\n'.join(report_parts))
+    
+    # Health vitals/readings
+    vitals = HealthReading.query.filter_by(user_id=user_id)\
+        .order_by(HealthReading.date.desc()).limit(5).all()
+    
+    if vitals:
+        vitals_parts = ["Health Vitals (Recent readings):"]
+        for v in vitals:
+            v_line = f"  {v.date.isoformat()}:"
+            if v.bp_systolic: v_line += f" BP {v.bp_systolic}/{v.bp_diastolic} mmHg"
+            if v.sugar_level: v_line += f", Sugar {v.sugar_level} mg/dL ({v.sugar_type or 'fasting'})"
+            if v.notes: v_line += f" - {v.notes}"
+            vitals_parts.append(v_line)
+        data_points.append('\n'.join(vitals_parts))
     
     if not data_points:
-        return f"You have {len(prescriptions)} prescriptions and {len(reports)} lab reports on file."
+        return f"You have {len(prescriptions)} prescriptions and {len(reports)} lab reports on file, but no detailed data was extracted yet."
     
     # Get API key
     gemini_api_key, _ = get_next_api_key()
     if not gemini_api_key:
-        return f"You have {len(prescriptions)} prescriptions and {len(reports)} lab reports on file."
+        return f"AI service is currently unavailable. You have {len(prescriptions)} prescriptions and {len(reports)} lab reports on file."
     
     try:
         genai.configure(api_key=gemini_api_key)
         model = genai.GenerativeModel('gemini-2.5-flash')
         
-        prompt = f"""Based on this patient's recent medical records, write a brief 2-3 sentence overall health summary.
-Be encouraging but factual. Focus on current treatments and any follow-up needed.
+        all_data = '\n\n'.join(data_points)
+        
+        prompt = f"""You are a medical health analyst for the Medi-Sum app. Based on this patient's complete medical records, generate a comprehensive but concise health summary.
 
-MEDICAL RECORDS:
-{chr(10).join(data_points)}
+PATIENT MEDICAL RECORDS:
+{all_data}
 
-Write the summary in second person (You have..., Your...). Keep it under 50 words."""
+INSTRUCTIONS:
+- Write in second person ("You are currently taking...", "Your blood pressure...")
+- Include these sections clearly separated:
+  1. OVERALL HEALTH ASSESSMENT (2-3 sentences)
+  2. ACTIVE TREATMENTS (list current medicines and their purposes if mentioned)
+  3. PENDING ACTIONS (upcoming tests, follow-ups)
+  4. RECOMMENDATIONS (lifestyle/health tips based on the data)
+- Be encouraging but factual
+- Keep total length under 200 words
+- Do NOT invent data that is not in the records
+- If data is limited, say so and suggest uploading more records"""
 
         response = model.generate_content(prompt)
         
@@ -1847,7 +1914,7 @@ Write the summary in second person (You have..., Your...). Keep it under 50 word
             
     except Exception as e:
         logger.error(f"Health summary generation failed: {e}")
-        return f"You have {len(prescriptions)} prescriptions and {len(reports)} lab reports on file."
+        return f"AI service temporarily unavailable. You have {len(prescriptions)} prescriptions and {len(reports)} lab reports on file."
 
 
 # --- Dashboard Stats API ---
@@ -1881,18 +1948,23 @@ def api_get_dashboard():
     for p in recent_prescriptions:
         recent_activity.append({
             'id': p.prescription_id,
+            'prescription_id': p.prescription_id,
             'type': 'prescription',
             'title': p.visit_reason or 'Medical Visit',
+            'subtitle': f"{len(p.medicines)} medicines" if p.medicines else '',
             'date': p.prescription_date.isoformat() if p.prescription_date else None,
-            'upload_date': p.upload_date.isoformat() if p.upload_date else None
+            'upload_date': p.upload_date.isoformat() if p.upload_date else None,
+            'timestamp': p.upload_date.strftime('%b %d') if p.upload_date else ''
         })
     for r in recent_reports:
         recent_activity.append({
             'id': r.report_id,
             'type': 'report',
             'title': r.lab_name or 'Lab Report',
+            'subtitle': r.summary or '',
             'date': r.report_date.isoformat() if r.report_date else None,
-            'upload_date': r.upload_date.isoformat() if r.upload_date else None
+            'upload_date': r.upload_date.isoformat() if r.upload_date else None,
+            'timestamp': r.upload_date.strftime('%b %d') if r.upload_date else ''
         })
     
     # Sort by upload_date descending
@@ -1923,16 +1995,35 @@ def api_get_dashboard():
     # Limit to 5 for dashboard
     todays_medication = todays_medication[:5]
     
+    # Latest vitals
+    latest_vital = HealthReading.query.filter_by(user_id=user_id)\
+        .order_by(HealthReading.date.desc()).first()
+    
+    latest_vitals = {}
+    if latest_vital:
+        latest_vitals = {
+            'date': latest_vital.date.isoformat(),
+            'bp_systolic': latest_vital.bp_systolic,
+            'bp_diastolic': latest_vital.bp_diastolic,
+            'sugar_level': latest_vital.sugar_level,
+            'sugar_type': latest_vital.sugar_type
+        }
+    
     return jsonify({
         'stats': {
-            'prescriptions': prescription_count,
-            'medicines': medicine_count,
-            'tests': test_count,
-            'pending_tests': pending_tests,
+            'prescription_count': prescription_count,
+            'medicine_count': medicine_count,
+            'test_count': test_count,
+            'pending_count': pending_tests,
             'reports': reports_count
         },
-        'todays_medication': todays_medication,             
-        'recent': recent_activity,
+        'active_medicines': todays_medication,
+        'pending_tests': [{'test_name': t.test_name, 'instructions': t.instructions}
+                          for p in user_prescriptions 
+                          for t in p.medical_tests 
+                          if t.status == 'pending'][:5],
+        'recent_activity': recent_activity,
+        'latest_vitals': latest_vitals,
         'summary_status': 'available'
     }), 200
 
@@ -1941,18 +2032,22 @@ def api_get_dashboard():
 @csrf.exempt
 @jwt_required()
 def api_generate_summary():
-    """Generate overall health summary on demand."""
+    """Generate overall health summary on demand using Gemini AI."""
     user_id = int(get_jwt_identity())
     
     # Get all records
-    prescriptions = Prescription.query.filter_by(user_id=user_id).all()
-    reports = LabReport.query.filter_by(user_id=user_id).all()
+    prescriptions = Prescription.query.filter_by(user_id=user_id)\
+        .order_by(Prescription.upload_date.desc()).all()
+    reports = LabReport.query.filter_by(user_id=user_id)\
+        .order_by(LabReport.upload_date.desc()).all()
     
     # Generate summary
     summary = generate_health_summary(user_id, prescriptions, reports)
     
     return jsonify({
         'summary': summary,
+        'prescription_count': len(prescriptions),
+        'report_count': len(reports),
         'timestamp': datetime.utcnow().isoformat()
     }), 200
 
