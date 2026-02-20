@@ -183,6 +183,8 @@ class Prescription(db.Model):
     prescription_date = db.Column(db.Date)  # Date written on the prescription
     visit_reason = db.Column(db.String(255))  # Short title/reason for visit
     key_insights = db.Column(db.String(500))  # One-sentence key insight or takeaway
+    patient_info_json = db.Column(db.Text)  # Structured patient info as JSON
+    doctor_info_json = db.Column(db.Text)  # Structured doctor info as JSON
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -634,10 +636,10 @@ def extract_structured_data(ocr_text):
     # Get API key using rotation system
     gemini_api_key, key_index = get_next_api_key()
     if not gemini_api_key:
-        return [], [], None, None, None, None, None, "No Gemini API keys available"
+        return [], [], None, None, None, None, None, None, None, "No Gemini API keys available"
     
     if not ocr_text or len(ocr_text.strip()) < 10:
-        return [], [], None, None, None, None, None, "OCR text is too short to extract data"
+        return [], [], None, None, None, None, None, None, None, "OCR text is too short to extract data"
     
     try:
         genai.configure(api_key=gemini_api_key)
@@ -653,6 +655,21 @@ PRESCRIPTION TEXT:
 
 Return a JSON object with this exact structure:
 {{
+    "patient_info": {{
+        "name": "patient full name",
+        "age": "age like 43 years",
+        "gender": "Male or Female",
+        "patient_id": "patient ID/UHID if mentioned",
+        "mobile": "mobile number if mentioned",
+        "address": "address if mentioned",
+        "visit_type": "visit type like Free, Paid, Follow-up"
+    }},
+    "doctor_info": {{
+        "name": "doctor full name with Dr. prefix",
+        "qualifications": "all qualifications like MBBS, MD, MS etc",
+        "specialty": "specialty like Cardiologist, Gynaecologist",
+        "hospital": "hospital or clinic name if mentioned"
+    }},
     "medicines": [
         {{
             "name": "medicine name",
@@ -682,6 +699,7 @@ Rules:
 - Only include medicines and tests that are clearly mentioned
 - If no medicines found, return empty array []
 - If no tests found, return empty array []
+- Extract patient and doctor information exactly as written on the prescription
 - Return ONLY the JSON object, no other text"""
 
         response = model.generate_content(prompt)
@@ -717,6 +735,8 @@ Rules:
         patient_summary = data.get('patient_summary')
         visit_reason = data.get('visit_reason')
         key_insights = data.get('key_insights')
+        patient_info = data.get('patient_info', {})
+        doctor_info = data.get('doctor_info', {})
         prescription_date_str = data.get('prescription_date')
         
         prescription_date = None
@@ -726,15 +746,15 @@ Rules:
             except:
                 pass # Keep as None if parse fails
         
-        return medicines, tests, doctor_summary, patient_summary, prescription_date, visit_reason, key_insights, None
+        return medicines, tests, doctor_summary, patient_summary, prescription_date, visit_reason, key_insights, patient_info, doctor_info, None
         
     except json.JSONDecodeError as e:
         logger.error(f"JSON parse error: {e}")
-        logger.error(f"Raw response was: {response.text}") # Log the raw response for debugging
-        return [], [], None, None, None, None, None, f"Failed to parse extracted data. Raw log has details."
+        logger.error(f"Raw response was: {response.text}")
+        return [], [], None, None, None, None, None, None, None, f"Failed to parse extracted data. Raw log has details."
     except Exception as e:
         logger.error(f"Extraction error: {str(e)}")
-        return [], [], None, None, None, None, None, f"Extraction failed: {str(e)}"
+        return [], [], None, None, None, None, None, None, None, f"Extraction failed: {str(e)}"
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -786,7 +806,7 @@ def upload():
             
             # If OCR was successful, extract structured data
             if ocr_text:
-                medicines_data, tests_data, doc_summary, pat_summary, pres_date, reason, insights, extract_error = extract_structured_data(ocr_text)
+                medicines_data, tests_data, doc_summary, pat_summary, pres_date, reason, insights, pat_info, doc_info, extract_error = extract_structured_data(ocr_text)
                 
                 # Update prescription with summaries
                 prescription.doctor_summary = doc_summary
@@ -794,6 +814,10 @@ def upload():
                 prescription.prescription_date = pres_date
                 prescription.visit_reason = reason
                 prescription.key_insights = insights
+                if pat_info:
+                    prescription.patient_info_json = json.dumps(pat_info)
+                if doc_info:
+                    prescription.doctor_info_json = json.dumps(doc_info)
                 
                 # Add medicines
                 for med in medicines_data:
@@ -1345,6 +1369,18 @@ def api_get_prescription(prescription_id):
         'instructions': t.instructions
     } for t in prescription.medical_tests]
     
+    # Parse stored JSON for patient/doctor info
+    patient_info = {}
+    doctor_info_data = {}
+    try:
+        if prescription.patient_info_json:
+            patient_info = json.loads(prescription.patient_info_json)
+    except: pass
+    try:
+        if prescription.doctor_info_json:
+            doctor_info_data = json.loads(prescription.doctor_info_json)
+    except: pass
+    
     return jsonify({
         'id': prescription.prescription_id,
         'image_url': f"/static/uploads/{prescription.image_path}" if prescription.image_path else None,
@@ -1353,6 +1389,8 @@ def api_get_prescription(prescription_id):
         'patient_summary': prescription.patient_summary,
         'visit_reason': prescription.visit_reason,
         'key_insights': prescription.key_insights,
+        'patient_info': patient_info,
+        'doctor_info': doctor_info_data,
         'prescription_date': prescription.prescription_date.isoformat() if prescription.prescription_date else None,
         'upload_date': prescription.upload_date.isoformat() if prescription.upload_date else None,
         'medicines': medicines,
@@ -1426,13 +1464,17 @@ def api_upload_prescription():
         
         # Extract structured data
         if ocr_text:
-            medicines_data, tests_data, doc_summary, pat_summary, pres_date, reason, insights, extract_error = extract_structured_data(ocr_text)
+            medicines_data, tests_data, doc_summary, pat_summary, pres_date, reason, insights, pat_info, doc_info, extract_error = extract_structured_data(ocr_text)
             
             prescription.doctor_summary = doc_summary
             prescription.patient_summary = pat_summary
             prescription.prescription_date = pres_date
             prescription.visit_reason = reason
             prescription.key_insights = insights
+            if pat_info:
+                prescription.patient_info_json = json.dumps(pat_info)
+            if doc_info:
+                prescription.doctor_info_json = json.dumps(doc_info)
             
             for med in medicines_data:
                 if med.get('name'):
