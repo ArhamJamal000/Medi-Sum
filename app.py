@@ -2186,6 +2186,7 @@ def api_pharma_compare():
         return jsonify({'error': 'Medicine name required'}), 400
     
     medicine_name = data['medicine_name']
+    dosage = data.get('dosage', '')
     
     # Use Gemini to find alternatives
     import google.generativeai as genai
@@ -2202,38 +2203,63 @@ def api_pharma_compare():
             genai.configure(api_key=gemini_api_key)
             model = genai.GenerativeModel('gemini-2.5-flash')
             
-            prompt = f"""You are a pharmacist assistant. For the medicine "{medicine_name}", provide:
-
-1. The generic name/active ingredient
-2. 3-5 alternative brands with the SAME formula/active ingredient
-3. Estimated price comparison (use approximate Indian Rupee prices)
+            prompt = f"""You are an expert pharmacist assistant in India. For the medicine "{medicine_name}" {f'({dosage})' if dosage else ''}, provide comprehensive information.
 
 Return ONLY valid JSON in this exact format:
 {{
     "original": {{
         "name": "{medicine_name}",
-        "generic_name": "the active ingredient",
-        "estimated_price": "₹XXX"
+        "generic_name": "the active ingredient / salt composition",
+        "description": "Brief 1-2 sentence description of what this medicine is",
+        "uses": ["Primary use 1", "Primary use 2", "Primary use 3"],
+        "side_effects": ["Common side effect 1", "Common side effect 2", "Common side effect 3", "Common side effect 4"],
+        "estimated_price": "₹XXX",
+        "manufacturer": "Original manufacturer name"
     }},
     "alternatives": [
         {{
-            "name": "Brand Name",
-            "manufacturer": "Company Name",
+            "name": "Alternative Brand Name",
+            "manufacturer": "Manufacturing Company",
             "estimated_price": "₹XXX",
-            "savings": "XX%"
+            "savings": "XX%",
+            "buy_link": "https://www.1mg.com/search/all?name=MEDICINE_NAME"
+        }},
+        {{
+            "name": "Another Alternative",
+            "manufacturer": "Another Company",
+            "estimated_price": "₹XXX",
+            "savings": "XX%",
+            "buy_link": "https://pharmeasy.in/search/all?name=MEDICINE_NAME"
         }}
     ],
-    "note": "Brief note about generic equivalence"
+    "buy_links": {{
+        "1mg": "https://www.1mg.com/search/all?name={medicine_name.replace(' ', '+')}",
+        "pharmeasy": "https://pharmeasy.in/search/all?name={medicine_name.replace(' ', '+')}",
+        "netmeds": "https://www.netmeds.com/catalogsearch/result?q={medicine_name.replace(' ', '+')}"
+    }},
+    "precautions": "One important precaution or warning about this medicine",
+    "note": "Brief note about generic equivalence and safety"
 }}
 
-Return ONLY the JSON, no other text."""
+Rules:
+- Provide 3-5 REAL alternative brands available in India with the SAME active ingredient
+- Use approximate Indian Rupee prices (be reasonably accurate)
+- buy_link for each alternative should be a real search URL on 1mg.com, pharmeasy.in, or netmeds.com
+- side_effects should be the most common ones
+- uses should be the primary medical uses
+- Return ONLY the JSON, no other text"""
             
-            # Reduce generation config to save tokens/quota
             response = model.generate_content(prompt)
             response_text = response.text.strip()
             
             # Extract JSON from response
             import re
+            # Remove markdown code blocks if present
+            if "```" in response_text:
+                match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', response_text)
+                if match:
+                    response_text = match.group(1)
+            
             json_match = re.search(r'\{[\s\S]*\}', response_text)
             if json_match:
                 alternatives_data = json.loads(json_match.group())
@@ -2262,17 +2288,28 @@ Return ONLY the JSON, no other text."""
         "original": {
             "name": medicine_name,
             "generic_name": "Could not retrieve details",
-            "estimated_price": "N/A"
+            "description": "AI service is currently unavailable.",
+            "uses": [],
+            "side_effects": [],
+            "estimated_price": "N/A",
+            "manufacturer": "Unknown"
         },
         "alternatives": [
             {
                 "name": "Generic Alternative",
                 "manufacturer": "Various",
-                "estimated_price": "Unknown",
-                "savings": "Ask Pharmacist"
+                "estimated_price": "Ask Pharmacist",
+                "savings": "~40-60%",
+                "buy_link": f"https://www.1mg.com/search/all?name={medicine_name.replace(' ', '+')}"
             }
         ],
-        "note": "AI service is currently busy (Quota Exceeded). Please consult a local pharmacist."
+        "buy_links": {
+            "1mg": f"https://www.1mg.com/search/all?name={medicine_name.replace(' ', '+')}",
+            "pharmeasy": f"https://pharmeasy.in/search/all?name={medicine_name.replace(' ', '+')}",
+            "netmeds": f"https://www.netmeds.com/catalogsearch/result?q={medicine_name.replace(' ', '+')}"
+        },
+        "precautions": "Always consult your doctor before switching medications.",
+        "note": "AI service is currently busy. Please consult a local pharmacist."
     }), 200
 
 
