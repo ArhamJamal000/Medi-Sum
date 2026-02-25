@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Upload Prescription - Medical App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00bdd6",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2123",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
+<div class="flex items-center justify-between px-4 py-4">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">arrow_back</span>
+</button>
+<h1 class="text-lg font-semibold tracking-tight">Upload Prescription</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col px-6 py-8 max-w-lg mx-auto w-full">
+<!-- Step Indicator -->
+<div class="flex items-center justify-center gap-2 mb-8">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold">1</span>
+<span class="text-sm font-medium text-primary">Choose File</span>
+</div>
+<div class="h-px w-8 bg-slate-200 dark:bg-slate-700"></div>
+<div class="flex items-center gap-2 opacity-40">
+<span class="w-6 h-6 rounded-full border border-slate-400 text-xs flex items-center justify-center font-bold">2</span>
+<span class="text-sm font-medium">Analyze</span>
+</div>
+</div>
+<!-- Instructional Text -->
+<div class="text-center mb-8">
+<h2 class="text-2xl font-bold mb-2">Upload your prescription</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">
+                Our AI will analyze your prescription to help you manage your medications. Supported formats: <span class="font-medium text-slate-700 dark:text-slate-300">JPG, PNG, PDF</span>
+</p>
+</div>
+<!-- Dashed Upload Box -->
+<div class="group relative flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 dark:bg-primary/10 px-6 py-16 transition-all hover:border-primary hover:bg-primary/10 cursor-pointer">
+<div class="bg-primary/20 p-4 rounded-full">
+<span class="material-symbols-outlined text-primary text-4xl">cloud_upload</span>
+</div>
+<div class="text-center">
+<p class="text-lg font-semibold text-slate-800 dark:text-slate-200">Tap to upload</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">or drag and drop your file here</p>
+</div>
+<button class="mt-2 inline-flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 px-6 py-2 text-sm font-bold shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-colors">
+                Browse Files
+            </button>
+<input class="absolute inset-0 opacity-0 cursor-pointer" type="file"/>
+</div>
+<!-- Selected File Preview (Placeholder for UI state) -->
+<div class="mt-8 space-y-3">
+<div class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+<div class="bg-primary/10 p-2 rounded text-primary">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium truncate">prescription_dr_smith.pdf</p>
+<p class="text-xs text-slate-500">1.2 MB • Ready to analyze</p>
+</div>
+<button class="p-1 text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<!-- Primary Action Button -->
+<div class="mt-auto pt-10">
+<button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 transition-all transform active:scale-[0.98]">
+<span class="material-symbols-outlined">analytics</span>
+                Upload &amp; Analyze
+            </button>
+<p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-4 px-4">
+                By uploading, you agree to our processing of medical data as per our Privacy Policy.
+            </p>
+</div>
+</main>
+<!-- Global Bottom Navigation -->
+<nav class="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-2 pb-6 pt-2">
+<div class="flex justify-around items-center">
+<a class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined active-icon">upload_file</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Upload</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Timeline</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">medication</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Pharma</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prescription Analysis - Detailed View</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter & JetBrains Mono for the tech-medical aesthetic -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00bdd6",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2123",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mono-heading {
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<!-- Top Navigation Bar -->
+<nav class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-200">arrow_back</span>
+</button>
+<h1 class="text-sm font-bold mono-heading text-primary">Analysis_Report_v2.0</h1>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-200">share</span>
+</button>
+<button class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-200">more_vert</span>
+</button>
+</div>
+</nav>
+<main class="max-w-2xl mx-auto p-4 space-y-6">
+<!-- Header & Confidence -->
+<header class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-xs font-medium text-slate-500 uppercase tracking-widest">Prescription Date</p>
+<h2 class="text-xl font-bold">Oct 24, 2023</h2>
+</div>
+<div class="text-right">
+<p class="text-xs font-bold mono-heading text-primary/80">AI_CONFIDENCE_SCORE</p>
+<p class="text-2xl font-bold text-primary">98.4%</p>
+</div>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-xs">person</span>
+<span>Dr. Sarah Jenkins, MD</span>
+<span class="mx-1 text-slate-300">•</span>
+<span>St. Mary's General Hospital</span>
+</div>
+</header>
+<!-- Image Preview Hero -->
+<section class="group relative overflow-hidden rounded-xl border-2 border-primary/20 bg-white dark:bg-slate-900">
+<div class="aspect-[16/9] w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Close up of a medical prescription paper scan" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCobLj0Vc1mP0AGb_AbxHkWA1EDzFQt4tauocB2yKWp3oi-JP_unbg-ZcUx5uBJXMBvehfJ4HgZm3FeXJMi8qWeWga6C6ZiGKUdd_gdgQU7GSpI_lh1yiAw1QFFCJFpHb37NCeAcxS93M8FS32fzlT2HZLfdTPq-IAosRQzdO6LKydgSSTLztVhArrPU0uJNHuqaMicGolO4Ak7baMgmSIMV54-1jr8g48tWF9OF3PDB4Qw7wNd8qVNEaPmLzfslg8J4RD5i3QNgU4');">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-4">
+<button class="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+<span class="material-symbols-outlined text-sm">fullscreen</span>
+                        View Original Scan
+                    </button>
+</div>
+</div>
+</section>
+<!-- AI Summary: For Patient -->
+<section class="bg-primary/10 border border-primary/20 rounded-xl p-5 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-10">
+<span class="material-symbols-outlined text-6xl text-primary">forum</span>
+</div>
+<h3 class="mono-heading text-xs font-bold text-primary mb-3">PATIENT_SUMMARY</h3>
+<p class="text-slate-800 dark:text-slate-100 leading-relaxed font-medium">
+                Take your antibiotics every 8 hours with food to prevent stomach upset. Continue the full course for 7 days. Ensure you schedule your blood sugar test by Friday morning.
+            </p>
+<div class="mt-4 flex gap-2">
+<button class="bg-primary text-white text-xs font-bold py-2 px-4 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">alarm</span>
+                    Set Reminders
+                </button>
+</div>
+</section>
+<!-- AI Summary: Clinical -->
+<section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+<h3 class="mono-heading text-xs font-bold text-slate-500 mb-3">CLINICAL_SUMMARY</h3>
+<div class="space-y-3">
+<p class="text-sm text-slate-700 dark:text-slate-300 italic">
+                    "Patient presenting with symptoms of acute bacterial pharyngitis. ICD-10: J02.9. Prescribed standard broad-spectrum antibiotic course and follow-up metabolic panel."
+                </p>
+<div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-mono text-slate-500">TAG: ANTIBIOTIC</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-mono text-slate-500">ICD: J02.9</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-mono text-slate-500">FOLLOW_UP: REQUIRED</span>
+</div>
+</div>
+</section>
+<!-- Medicines Table -->
+<section>
+<h3 class="mono-heading text-xs font-bold text-slate-500 mb-3 px-1">MEDICATION_LOG</h3>
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<tr>
+<th class="px-4 py-3 font-bold text-slate-500">Drug Name</th>
+<th class="px-4 py-3 font-bold text-slate-500">Dose</th>
+<th class="px-4 py-3 font-bold text-slate-500">Freq</th>
+<th class="px-4 py-3 font-bold text-slate-500">Dur</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-4 py-4">
+<span class="font-bold text-primary block">Amoxicillin</span>
+<span class="text-[10px] text-slate-400">Capsule</span>
+</td>
+<td class="px-4 py-4 text-slate-600 dark:text-slate-400">500mg</td>
+<td class="px-4 py-4 text-slate-600 dark:text-slate-400 font-medium">TID (3x)</td>
+<td class="px-4 py-4 text-slate-600 dark:text-slate-400">7 Days</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-4 py-4">
+<span class="font-bold text-primary block">Paracetamol</span>
+<span class="text-[10px] text-slate-400">Tablet</span>
+</td>
+<td class="px-4 py-4 text-slate-600 dark:text-slate-400">650mg</td>
+<td class="px-4 py-4 text-slate-600 dark:text-slate-400 font-medium">PRN</td>
+<td class="px-4 py-4 text-slate-600 dark:text-slate-400">3 Days</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- Medical Tests List -->
+<section>
+<h3 class="mono-heading text-xs font-bold text-slate-500 mb-3 px-1">DIAGNOSTIC_ORDERS</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div>
+<p class="font-bold text-sm">HbA1c (Blood Sugar)</p>
+<p class="text-xs text-slate-500">Requires fasting (8-12 hrs)</p>
+</div>
+</div>
+<span class="px-2.5 py-1 bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 rounded-full text-[10px] font-bold uppercase tracking-wider">Action Required</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">ecg</span>
+</div>
+<div>
+<p class="font-bold text-sm">Complete Blood Count (CBC)</p>
+<p class="text-xs text-slate-500">General metabolic screening</p>
+</div>
+</div>
+<span class="px-2.5 py-1 bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 rounded-full text-[10px] font-bold uppercase tracking-wider">Pending</span>
+</div>
+</div>
+</section>
+<!-- Collapsible OCR Section -->
+<section class="border-t border-slate-200 dark:border-slate-800 pt-6">
+<details class="group bg-slate-50 dark:bg-slate-900/50 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">terminal</span>
+<span class="mono-heading text-xs font-bold text-slate-500">RAW_OCR_DATA</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="px-4 pb-4 font-mono text-[11px] text-slate-500 overflow-x-auto whitespace-pre leading-relaxed border-t border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-800/30">
+[OCR START]
+ST. MARY'S GENERAL HOSPITAL - OUTPATIENT DEPT
+DR SARAH JENKINS (REG NO: 29312)
+DATE: 24/10/2023
+NAME: JOHN DOE | AGE: 45Y | GEN: M
+RX:
+1. CAP AMOXICILLIN 500MG - TID X 7 DAYS (PC)
+2. TAB PARACETAMOL 650MG - PRN SOS FOR FEVER
+ADVICE:
+- COMPLETE BLOOD COUNT
+- HBA1C (FASTING)
+- DRINK PLENTY OF WATER
+[OCR END]
+                </div>
+</details>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Matching component list style) -->
+<div class="fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-slate-100 dark:bg-background-dark dark:border-slate-800">
+<div class="flex gap-2 px-4 pb-3 pt-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">home</span>
+</div>
+<p class="text-[10px] font-medium leading-normal">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">description</span>
+</div>
+<p class="text-[10px] font-medium leading-normal">Records</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+</div>
+<p class="text-[10px] font-medium leading-normal">Scan</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">person</span>
+</div>
+<p class="text-[10px] font-medium leading-normal">Profile</p>
+</a>
+</div>
+</div>
+<!-- Floating Action Button -->
+<button class="fixed right-6 bottom-24 w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform z-50">
+<span class="material-symbols-outlined text-3xl">local_pharmacy</span>
+</button>
+</body></html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#f5f8f8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Medi-Sum</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00bdd6",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2123",
+                        "success": "#10b981",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: max(884px, 100dvh);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .mono-heading {
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 19px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            opacity: 0.3;
+            background: repeating-linear-gradient(to bottom, #00bdd6 0, #00bdd6 4px, transparent 4px, transparent 8px);
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Prevent text selection on UI elements */
+        button,
+        a,
+        .nav-tab {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #f5f8f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #00bdd6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-screen p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+
+        /* Toast */
+        #toast-container {
+            position: fixed;
+            top: env(safe-area-inset-top, 20px);
+            left: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            pointer-events: auto;
+            animation: toastIn 0.3s ease-out;
+        }
+
+        .toast-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .toast-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .toast-info {
+            background: #e0f2fe;
+            color: #075985;
+            border: 1px solid #bae6fd;
+        }
+
+        @keyframes toastIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Page transitions */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-enter {
+            animation: fadeInUp 0.3s ease-out forwards;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background-light text-slate-900 min-h-screen">
+    <div id="app" class="flex flex-col h-full min-h-screen">
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading-screen">
+            <div class="spinner"></div>
+            <p>Loading Medi-Sum...</p>
+        </div>
+
+        <!-- Auth Container -->
+        <div id="auth-container"
+            class="hidden flex-1 min-h-screen relative flex items-center justify-center p-6 sm:p-12 overflow-hidden bg-gradient-to-br from-[#f5f8f8] to-[#e0f0f2]">
+            <!-- Decorative Background Elements -->
+            <div class="absolute top-0 left-0 w-full h-96 bg-primary/10 rounded-b-[100px] -translate-y-20 blur-3xl">
+            </div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-teal-400/20 rounded-full translate-y-20 blur-3xl"></div>
+
+            <div class="relative w-full max-w-md z-10">
+                <!-- Login Form -->
+                <div id="login-view"
+                    class="bg-white/90 backdrop-blur-xl border border-white rounded-[32px] shadow-2xl shadow-primary/10 p-8 sm:p-10 page-enter">
+                    <div class="text-center mb-10">
+                        <div
+                            class="size-20 bg-gradient-to-br from-primary to-primary/80 rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-primary/30 mb-6 rotate-3 hover:rotate-0 transition-transform duration-300">
+                            <span class="material-symbols-outlined text-white text-4xl">medical_services</span>
+                        </div>
+                        <h1 class="text-3xl font-bold tracking-tight text-slate-800 mb-2">Welcome Back</h1>
+                        <p class="text-sm font-medium text-slate-500">Sign in to your intelligent medical co-pilot.</p>
+                    </div>
+
+                    <form id="login-form" class="space-y-5">
+                        <div class="space-y-1.5">
+                            <label for="login-email"
+                                class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Email
+                                Address</label>
+                            <div class="relative group">
+                                <span
+                                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">mail</span>
+                                <input type="email" id="login-email" required placeholder="you@example.com"
+                                    class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label for="login-password"
+                                class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Password</label>
+                            <div class="relative group">
+                                <span
+                                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">lock</span>
+                                <input type="password" id="login-password" required placeholder="••••••••"
+                                    class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700">
+                            </div>
+                            <div class="flex justify-end pt-1">
+                                <a href="#"
+                                    class="text-xs font-bold text-primary hover:text-primary/80 transition-colors">Forgot
+                                    Password?</a>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 space-y-3">
+                            <button type="submit"
+                                class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg shadow-slate-900/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                                Sign In
+                                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            </button>
+
+                            <button type="button"
+                                onclick="window.app.showToast('Face ID / Touch ID integration coming soon', 'info')"
+                                class="w-full bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[20px] text-slate-500">fingerprint</span>
+                                Sign in with Biometrics
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-8 text-center">
+                        <p class="text-sm font-medium text-slate-500">Don't have an account? <a href="#"
+                                id="show-register"
+                                class="text-primary font-bold ml-1 hover:underline decoration-2 underline-offset-4">Create
+                                one</a></p>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-view"
+                    class="bg-white/90 backdrop-blur-xl border border-white rounded-[32px] shadow-2xl shadow-primary/10 p-8 sm:p-10 page-enter hidden">
+                    <div class="text-center mb-8">
+                        <div
+                            class="size-16 bg-gradient-to-br from-teal-400 to-primary rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-teal-500/30 mb-5 -rotate-3 hover:rotate-0 transition-transform duration-300">
+                            <span class="material-symbols-outlined text-white text-3xl">person_add</span>
+                        </div>
+                        <h1 class="text-2xl font-bold tracking-tight text-slate-800 mb-2">Create Account</h1>
+                        <p class="text-sm font-medium text-slate-500">Join Medi-Sum to manage your health seamlessly.
+                        </p>
+                    </div>
+
+                    <form id="register-form" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label for="register-name"
+                                class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Full Name</label>
+                            <div class="relative group">
+                                <span
+                                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">badge</span>
+                                <input type="text" id="register-name" required placeholder="John Doe"
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label for="register-email"
+                                class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Email
+                                Address</label>
+                            <div class="relative group">
+                                <span
+                                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">mail</span>
+                                <input type="email" id="register-email" required placeholder="you@example.com"
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label for="register-password"
+                                class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Password</label>
+                            <div class="relative group">
+                                <span
+                                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">lock</span>
+                                <input type="password" id="register-password" required minlength="6"
+                                    placeholder="••••••••"
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700">
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit"
+                                class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                                Create Account
+                                <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-6 text-center">
+                        <p class="text-sm font-medium text-slate-500">Already have an account? <a href="#"
+                                id="show-login"
+                                class="text-slate-800 font-bold ml-1 hover:underline decoration-2 underline-offset-4">Sign
+                                in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App Container -->
+        <div id="main-container" class="hidden flex flex-col flex-1 min-h-screen">
+            <!-- Main Content Area -->
+            <main id="main-content" class="flex-1 overflow-y-auto overflow-x-hidden pb-24"
+                style="-webkit-overflow-scrolling:touch;">
+                <!-- Pages loaded here dynamically -->
+            </main>
+
+            <!-- Bottom Navigation -->
+            <nav id="bottom-nav"
+                class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 px-2 pt-3 pb-6">
+                <div class="max-w-lg mx-auto flex justify-around items-center">
+                    <a href="#" class="nav-tab flex flex-col items-center gap-1 text-primary" data-page="dashboard">
+                        <span class="material-symbols-outlined filled">grid_view</span>
+                        <span class="text-[10px] font-bold">Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-tab flex flex-col items-center gap-1 text-slate-400" data-page="scan">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        <span class="text-[10px] font-medium">Upload</span>
+                    </a>
+                    <a href="#" class="nav-tab flex flex-col items-center gap-1 text-slate-400" data-page="timeline">
+                        <span class="material-symbols-outlined">history</span>
+                        <span class="text-[10px] font-medium">Timeline</span>
+                    </a>
+                    <a href="#" class="nav-tab flex flex-col items-center gap-1 text-slate-400" data-page="pharma">
+                        <span class="material-symbols-outlined">medication</span>
+                        <span class="text-[10px] font-medium">Pharma</span>
+                    </a>
+                    <a href="#" class="nav-tab flex flex-col items-center gap-1 text-slate-400" data-page="profile">
+                        <span class="material-symbols-outlined">person</span>
+                        <span class="text-[10px] font-medium">Profile</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- App Script -->
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

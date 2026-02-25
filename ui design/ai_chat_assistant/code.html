@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HealthAlly AI Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00bdd6",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2123",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">arrow_back</span>
+</button>
+<div class="relative">
+<div class="size-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border border-primary/20" data-alt="AI Health Assistant professional avatar icon" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAX44sHNVHsQUJqhKmxzIbA64OBTKKTd0018Va4VSjDBzeQvFVJm1v6ajIU35rE2OoC-mq-4PA-61V_we6Ql8VfIgMX-xOCjXuLYOxdpNNL-ydK34_pYaQpjNThs85vl1qUmDvTcA05GB4crTGyrY3yefM7R7sFoSRjYMm5_YyUUOCpglShQwpGk95PYL7rsMpXdJLP-OCieza08x6wKvZ5Gj1ir5o8v_u6fI4pzgO5gFbwKIw5OL-Q6aCGakjio-fBLVOVsE8NmBw'); background-size: cover;">
+</div>
+<div class="absolute bottom-0 right-0 size-3 bg-emerald-500 border-2 border-white dark:border-background-dark rounded-full"></div>
+</div>
+<div>
+<h1 class="text-sm font-semibold text-slate-900 dark:text-slate-100">HealthAlly AI</h1>
+<p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wider">Online Assistant</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 hover:bg-primary/10 rounded-lg text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">clinical_notes</span>
+</button>
+<button class="p-2 hover:bg-primary/10 rounded-lg text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Chat Area -->
+<main class="flex-1 overflow-y-auto p-4 space-y-6">
+<!-- Date Separator -->
+<div class="flex justify-center">
+<span class="text-[11px] font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full uppercase tracking-widest">Today</span>
+</div>
+<!-- AI Message -->
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0" data-alt="Small AI assistant profile thumbnail" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBvXDv9qy8XHuVO1PVa-BIFQnctKFSXRGWCEOtW0ewxaxE7Z1NR4sW5eXip5aRchkYrEYSdVGfsLPsOzSme4gS0sENkamzaPx4fapAAevrlli_vOyguL7bZ6nICdOXB7gO3BLVdw38xue4YEeI2yvYiuG13eET0CtBeVB_Wjg4whwFrV9p2Nvhrv-h-hPHtN4cQfvckFjeroa_bAhA4A4Tl1cttkasKhJvrql7btjEyjNgr8516f8gQBHL5n-dh3Q5ll5FIPZk3srU'); background-size: cover;">
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="bg-white dark:bg-slate-800 p-4 rounded-xl rounded-bl-none shadow-sm border border-primary/5">
+<p class="text-sm leading-relaxed">
+                        Hello! I'm your AI health assistant. I have access to your medical records and lab results. How can I help you today?
+                    </p>
+</div>
+<span class="text-[10px] text-slate-400 ml-1">09:41 AM</span>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex flex-col items-end gap-1.5 ml-auto max-w-[85%]">
+<div class="bg-primary text-white p-4 rounded-xl rounded-br-none shadow-md shadow-primary/20">
+<p class="text-sm leading-relaxed">
+                    Can you help me understand my current prescriptions? I feel a bit dizzy in the mornings.
+                </p>
+</div>
+<div class="flex items-center gap-1 mr-1">
+<span class="text-[10px] text-slate-400">09:42 AM</span>
+<span class="material-symbols-outlined text-[12px] text-primary">done_all</span>
+</div>
+</div>
+<!-- AI Message with Record Card -->
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0" data-alt="Small AI assistant profile thumbnail" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA744qUHYG_EQTvXLGVc7teCheh8FXcpN3GMQ_l3sGm60yYqTMavXXJaKvzFX8ntBurfBXF6RExrn1r6knp6AGwOn9pzS1Tf2yMOJjN0TlfW38pvDbtD_fRqvl3UBA_odaaUvInMOoEB_fBEn8y9Yh00dvEQ7VB4q7JsnJxnCQq5g0dbR4ZqDC50AYlwcyEFcYH2HVvp1BMGrtBY_fg6pJckx86flaczNVfCYmLExVsyXlg0RXKFhuQ00b_Xd1WR4IKlPxJHfQe_EE'); background-size: cover;">
+</div>
+<div class="flex flex-col gap-3">
+<div class="bg-white dark:bg-slate-800 p-4 rounded-xl rounded-bl-none shadow-sm border border-primary/5">
+<p class="text-sm leading-relaxed">
+                        According to your records, you are currently on <span class="font-semibold text-primary">Lisinopril 10mg</span>. Dizziness can be a side effect if taken on an empty stomach. 
+                        <br/><br/>
+                        Here is a summary of your last visit related to this:
+                    </p>
+</div>
+<!-- Medical Summary Card -->
+<div class="bg-white dark:bg-slate-800 border border-primary/20 rounded-xl overflow-hidden shadow-sm">
+<div class="bg-primary/5 p-3 border-b border-primary/10 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">description</span>
+<span class="text-xs font-semibold uppercase tracking-tight">Visit Summary - Oct 12</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">open_in_new</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">Doctor:</span>
+<span class="font-medium">Dr. Sarah Chen</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">Diagnosis:</span>
+<span class="font-medium">Mild Hypertension</span>
+</div>
+<div class="pt-2 border-t border-slate-100 dark:border-slate-700">
+<p class="text-[11px] text-slate-600 dark:text-slate-400 italic">"Patient started on Lisinopril. Monitor BP weekly and report any persistent fatigue."</p>
+</div>
+</div>
+</div>
+<span class="text-[10px] text-slate-400 ml-1">09:43 AM</span>
+</div>
+</div>
+<!-- Typing Indicator (Subtle) -->
+<div class="flex items-center gap-2 px-1">
+<div class="flex gap-1">
+<span class="size-1.5 bg-primary/40 rounded-full"></span>
+<span class="size-1.5 bg-primary/40 rounded-full"></span>
+<span class="size-1.5 bg-primary/40 rounded-full"></span>
+</div>
+<span class="text-[11px] text-slate-400 italic">HealthAlly is checking your lab results...</span>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<footer class="bg-white dark:bg-background-dark border-t border-primary/10 pb-6 pt-2">
+<!-- Suggestion Chips -->
+<div class="flex gap-2 overflow-x-auto px-4 py-2 hide-scrollbar">
+<button class="whitespace-nowrap px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-medium hover:bg-primary/10 transition-colors">
+                What medicines am I taking?
+            </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-medium hover:bg-primary/10 transition-colors">
+                Summarize last visit
+            </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-medium hover:bg-primary/10 transition-colors">
+                Recent lab results
+            </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-medium hover:bg-primary/10 transition-colors">
+                Book appointment
+            </button>
+</div>
+<!-- Input Area -->
+<div class="px-4 mt-2">
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-2xl p-2 pl-4 border border-transparent focus-within:border-primary/30 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all duration-200">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 placeholder:text-slate-400" placeholder="Ask about your health..." type="text"/>
+<button class="size-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+<div class="flex items-center justify-center gap-1.5 mt-3">
+<span class="material-symbols-outlined text-[14px] text-slate-400">lock</span>
+<p class="text-[10px] text-slate-400 font-medium uppercase tracking-widest">End-to-End Encrypted &amp; HIPAA Compliant</p>
+</div>
+</div>
+</footer>
+<!-- Bottom Navigation Bar (App Level) -->
+<nav class="bg-white dark:bg-background-dark border-t border-slate-100 dark:border-slate-800 px-6 py-2 flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1">chat_bubble</span>
+<span class="text-[10px] font-semibold">Chat</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">folder_open</span>
+<span class="text-[10px] font-medium">Records</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">monitoring</span>
+<span class="text-[10px] font-medium">Vitals</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">account_circle</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</nav>
+</body></html>

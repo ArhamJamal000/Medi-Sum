@@ -15,15 +15,16 @@
     },
     "dependencies": {
         "@capacitor/android": "^6.0.0",
+        "@capacitor/app": "^6.0.3",
         "@capacitor/camera": "^6.0.0",
         "@capacitor/core": "^6.0.0",
         "@capacitor/filesystem": "^6.0.0",
+        "@capacitor/haptics": "^6.0.0",
         "@capacitor/ios": "^6.0.0",
         "@capacitor/local-notifications": "^6.0.0",
         "@capacitor/preferences": "^6.0.0",
         "@capacitor/push-notifications": "^6.0.0",
         "@capacitor/share": "^6.0.0",
-        "@capacitor/haptics": "^6.0.0",
         "@capacitor/status-bar": "^6.0.0",
         "chart.js": "^4.4.1"
     },

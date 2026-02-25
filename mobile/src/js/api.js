@@ -3,7 +3,7 @@
  * Handles all API calls with JWT authentication
  */
 
-const API_BASE_URL = localStorage.getItem('api_url') || 'https://snobbily-civilisatory-denis.ngrok-free.dev';
+const API_BASE_URL = localStorage.getItem('api_url') || 'https://medi-sum.onrender.com';
 
 class ApiClient {
     constructor() {
@@ -216,11 +216,27 @@ class ApiClient {
         return this.request('/api/v1/pharma-assist');
     }
 
-    async compareMedicine(medicine_name) {
+    async compareMedicine(medicine_name, dosage = '') {
         return this.request('/api/v1/pharma-assist/compare', {
             method: 'POST',
-            body: JSON.stringify({ medicine_name })
+            body: JSON.stringify({ medicine_name, dosage })
         });
+    }
+
+    // Health Readings
+    async getHealthReadings() {
+        return this.request('/api/v1/health-readings');
+    }
+
+    async addHealthReading(data) {
+        return this.request('/api/v1/health-readings', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    async deleteHealthReading(id) {
+        return this.request(`/api/v1/health-readings/${id}`, { method: 'DELETE' });
     }
 }
 

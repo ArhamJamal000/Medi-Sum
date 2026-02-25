@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prescription History - MedTech</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00bdd6",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2123",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .active-nav {
+            color: #00bdd6;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="dark:bg-background-dark dark:text-slate-100 min-h-screen flex flex-col" style="background-color: #F0F4F8; color: #1A1A2E;">
+<!-- Header Section -->
+<header class="bg-white dark:bg-slate-900 border-b border-primary/10 sticky top-0 z-10">
+<div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">history_edu</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">Prescription History</h1>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors shadow-sm text-sm">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+<span>Upload New</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 mb-20">
+<!-- Search & Filter (Optional but adds to tech-medical feel) -->
+<div class="mb-6 flex flex-col sm:flex-row gap-3">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm" placeholder="Search by ID or medication..." type="text"/>
+</div>
+<button class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+                Filter
+            </button>
+</div>
+<!-- Desktop Table View -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"><th class="px-2 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-tight">ID</th><th class="px-2 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-tight">Date</th><th class="px-2 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-tight">Type</th><th class="px-2 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-tight">Status</th><th class="px-2 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-tight text-right">Act.</th></tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-2 py-4 text-sm whitespace-nowrap">#RX-293</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Oct 24, 2023</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Antibiotics</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    Processed
+                                </span>
+</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-2 py-4 text-sm whitespace-nowrap">#RX-294</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Oct 22, 2023</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Chronic</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    Pending
+                                </span>
+</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-2 py-4 text-sm whitespace-nowrap">#RX-288</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Oct 15, 2023</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Single Dose</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    Processed
+                                </span>
+</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-2 py-4 text-sm whitespace-nowrap">#RX-275</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Sep 28, 2023</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Vaccination</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    Processed
+                                </span>
+</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-2 py-4 text-sm whitespace-nowrap">#RX-262</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Sep 10, 2023</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">Chronic</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    Pending
+                                </span>
+</td>
+<td class="px-2 py-4 text-sm whitespace-nowrap">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination / Footer -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+<p class="text-sm text-slate-500">Showing 5 of 24 records</p>
+<div class="flex gap-2">
+<button class="p-1.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-1.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tip Card -->
+<div class="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-xl flex gap-4">
+<span class="material-symbols-outlined text-primary">info</span>
+<div>
+<p class="text-sm font-semibold text-primary">Digital Records Tip</p>
+<p class="text-xs text-slate-600 dark:text-slate-400 mt-1">Uploaded prescriptions are automatically digitized using OCR. Review the details once the status changes to "Processed".</p>
+</div>
+</div>
+</main>
+<!-- Global Bottom Nav -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-20 pb-safe">
+<div class="max-w-md mx-auto flex justify-around items-center h-16">
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="text-[10px] font-medium">Upload</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">timeline</span>
+<span class="text-[10px] font-medium">Timeline</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">medication</span>
+<span class="text-[10px] font-medium">Pharma</span>
+</a>
+<a class="flex flex-col items-center gap-1 active-nav" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">account_circle</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

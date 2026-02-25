@@ -1,0 +1,98 @@
+Medi-Sum Mobile App - UI Design & Architecture Reference
+=========================================================
+
+1. CORE TECHNOLOGY STACK
+------------------------
+- Framework: Capacitor (turns web app into native iOS/Android packages)
+- Architecture: Single Page Application (SPA)
+- Styling: Tailwind CSS (via CDN)
+- Icons: Material Symbols Outlined
+- Fonts: 
+  - Primary / Body: 'Inter' (sans-serif)
+  - Headings / Data: 'JetBrains Mono' (monospace)
+
+2. DESIGN TOKENS (COLORS)
+-------------------------
+- Primary (Brand): #00bdd6 (Teal/Cyan)
+- Background Light: #f5f8f8 (Off-white/slate tint)
+- Background Dark: #0f2123 (Used for dark mode / specific headers)
+- Success: #10b981 (Emerald green)
+- Warning: #f59e0b (Amber)
+- Danger/Error: #f43f5e (Rose)
+- Neutral/Text: Slate palette (slate-50 to slate-900)
+
+3. APP SHELL & NAVIGATION (index.html)
+--------------------------------------
+- Loading Screen: Central pulsing logo/loader.
+- Auth Screen: Login/Register toggle forms, "Sign in with Biometrics" button.
+- Main App Shell: `#main-content` container with padding for bottom nav.
+- Toast Notification System: Fixed top-center, animated pop-in alerts.
+- Bottom Navigation (Fixed Bottom):
+  5 Tabs using Material Symbols:
+  1. Dashboard (icon: grid_view)
+  2. Upload (icon: document_scanner) - Highlighted center FAB style.
+  3. Timeline (icon: timeline)
+  4. Pharma (icon: medication)
+  5. Profile (icon: person)
+
+4. PAGE-SPECIFIC UI PATTERNS
+----------------------------
+
+[Dashboard]
+- Welcome Header: User avatar, greeting, notification bell.
+- Onboarding State: Gradient primary-colored card encouraging first upload.
+- Stats Grid: 2x2 grid showing counts for Prescriptions, Medicines, Lab Tests, Pending.
+- Up Next Reminder: Highlighted amber/orange card showing the immediate next medication due.
+- Health Vitals Scroll: Horizontally scrolling cards (snap-x) showing BP, Sugar, Heart Rate history.
+- Medicines List: Distinguishes "Active" (teal border, checkmark button) vs "Completed" (greyed out, strikethrough).
+- Pending Tests: Cards highlighting overdue or upcoming tests with an "Upload Results" action.
+- Recent Activity: Vertical timeline feed of latest actions.
+- Empty States: Friendly illustrations (e.g., using Material Symbols) when no data is present.
+- Medicine Info Modal: Bottom sheet presenting medicine dosage, instructions, and allergy warnings.
+
+[Upload / Document Scan]
+- Flow: Step indicator (1. Select, 2. Analyze, 3. Complete).
+- Main Action: Large dashed dropzone area with a button opening the native camera/file picker.
+- Enhancements: "Scan Another Page" option for multi-page documents.
+- Cloud Import: Buttons for importing via WhatsApp or Google Drive.
+- Success State: Shows an "AI Confidence Score" (e.g., 94%) to build trust.
+
+[Timeline]
+- Header: Sticky top header. Toggle icon for "List View" vs "Calendar View".
+- Filters: Horizontally scrollable chips (e.g., "All History", "Dental", "Cardiology") that filter the view.
+- Content: Chronological nodes grouped by Month/Year. A vertical dashed line connects events.
+- Loading: Uses Skeleton Loaders (animated grey blocks) before data resolves.
+
+[History & Detail Pages]
+- History: List of cards containing small image thumbnails, test types, and doctor info. Search bar at the top.
+- Details: Full view of a specific record.
+  - Original Image header with "Fullscreen" expansion.
+  - Smart Extraction Prompt: If vitals (like BP) are found in text, a prompt asks to "Save to Vitals".
+  - Extracted Data: Highlights Doctor Name, Medical Facility.
+  - Data Tables: Extracted medicines and lab tests.
+  - Actions: "Book Follow-up", "AI Explain" (jumps to chat), "Share", "Delete Record".
+
+[AI Chat Assistant]
+- Header: pulsing "Context Active" badge indicating the AI remembers medical history.
+- Messages: Differentiated bubbles (teal for user, grey for AI).
+- Suggestions: Chips below the input box (e.g., "Summarize Oct 12 visit", "Side effects of Metformin").
+- Input: Auto-resizing textarea with a send arrow.
+
+[Health Vitals Logging]
+- Form: Inputs for Blood Pressure (Sys/Dia), Sugar Level, Weight, SpO2.
+- Dynamic Indicators: As the user types (e.g., BP 140/90), the UI dynamically shows a visual range indicator ("Normal", "Elevated", "High Stage 2") with corresponding colors.
+
+[User Profile]
+- Identity: Avatar and dynamic editable fields for Age, Gender, Weight, Blood Group.
+- Family Members: Horizontal list of profiles with an "Add New" button.
+- Preferences: App Theme (Light/Dark), Language options.
+- Security: "Delete Account" button colored red, invoking a GDPR-compliant confirmation flow.
+
+5. UX/UI PRINCIPLES APPLIED
+---------------------------
+- "Skeleton Loaders" over spinners to reduce perceived wait time.
+- "Empty States" carefully designed to guide the user (call to actions) rather than showing blank screens.
+- Generous touch targets (min 48px standard) and 8px grid spacing system.
+- `pb-24` padding on main views ensuring no content is hidden behind the fixed bottom navigation.
+- Use of animations (`animate-pulse`, `animate-fade-in-up`) to make interactions feel fluid.
+- "Frontend First": Complex logic (like checking off medicines or logging UI view states) persists visually via `localStorage` to give an immediate, snappy feel.
