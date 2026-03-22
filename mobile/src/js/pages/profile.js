@@ -1,8 +1,9 @@
 import { api } from '../api.js';
+import { getThemePreference, applyTheme } from '../theme.js';
 
 export async function renderProfile(container) {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const isDarkMode = localStorage.getItem('theme') === 'dark';
+    const currentTheme = getThemePreference();
     const currentLang = localStorage.getItem('lang') || 'English';
 
     container.innerHTML = `
@@ -137,20 +138,25 @@ export async function renderProfile(container) {
             </button>
 
             <!-- Dark Mode Toggle -->
-            <div class="w-full flex items-center justify-between p-4 bg-white">
+            <div class="w-full flex items-center justify-between p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 flex items-center justify-center">
                         <span class="material-symbols-outlined text-[20px]">dark_mode</span>
                     </div>
-                    <div>
-                        <span class="block text-sm font-medium text-slate-800">Dark Mode</span>
-                        <span class="block text-xs text-slate-500">Preview feature</span>
-                    </div>
+                    <span class="block text-sm font-medium text-slate-800 dark:text-slate-200">Appearance</span>
                 </div>
-                <!-- Toggle Switch UI -->
-                <button id="theme-toggle" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isDarkMode ? 'bg-primary' : 'bg-slate-200'}">
-                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isDarkMode ? 'translate-x-6' : 'translate-x-1'} shadow-sm"></span>
-                </button>
+                <!-- 3-Option Segmented Control -->
+                <div id="theme-selector" class="flex bg-slate-100 dark:bg-[#222838] rounded-lg p-0.5 gap-0.5">
+                    <button data-theme-val="light" class="theme-opt px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${currentTheme === 'light' ? 'bg-white dark:bg-[#1A1F2E] text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">
+                        <span class="material-symbols-outlined text-[14px] align-middle mr-0.5">light_mode</span>Light
+                    </button>
+                    <button data-theme-val="dark" class="theme-opt px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${currentTheme === 'dark' ? 'bg-white dark:bg-[#1A1F2E] text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">
+                        <span class="material-symbols-outlined text-[14px] align-middle mr-0.5">dark_mode</span>Dark
+                    </button>
+                    <button data-theme-val="system" class="theme-opt px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${currentTheme === 'system' ? 'bg-white dark:bg-[#1A1F2E] text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">
+                        <span class="material-symbols-outlined text-[14px] align-middle mr-0.5">monitor</span>Auto
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -195,21 +201,25 @@ export async function renderProfile(container) {
         });
     });
 
-    // Theme Toggle Logic
-    const themeBtn = document.getElementById('theme-toggle');
-    themeBtn?.addEventListener('click', () => {
-        const isDark = localStorage.getItem('theme') === 'dark';
-        if (isDark) {
-            localStorage.setItem('theme', 'light');
-            themeBtn.className = 'relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-slate-200';
-            themeBtn.innerHTML = '<span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1 shadow-sm"></span>';
-        } else {
-            localStorage.setItem('theme', 'dark');
-            themeBtn.className = 'relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-primary';
-            themeBtn.innerHTML = '<span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6 shadow-sm"></span>';
-            // Mock toggle (full implementation requires CSS payload)
-            window.app.showToast('Dark Mode is coming soon!', 'info');
-        }
+    // Theme Segmented Control Logic
+    const themeSelector = document.getElementById('theme-selector');
+    themeSelector?.querySelectorAll('.theme-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const choice = btn.getAttribute('data-theme-val');
+            applyTheme(choice);
+            // Update active button styling
+            themeSelector.querySelectorAll('.theme-opt').forEach(b => {
+                if (b.getAttribute('data-theme-val') === choice) {
+                    b.className = b.className.replace(/text-slate-500 dark:text-slate-400/g, 'text-slate-800 dark:text-slate-200');
+                    b.classList.add('bg-white', 'dark:bg-[#1A1F2E]', 'shadow-sm');
+                } else {
+                    b.classList.remove('bg-white', 'dark:bg-[#1A1F2E]', 'shadow-sm');
+                    b.className = b.className.replace(/text-slate-800 dark:text-slate-200/g, 'text-slate-500 dark:text-slate-400');
+                }
+            });
+            const labels = { light: 'Light Mode', dark: 'Dark Mode', system: 'System Default' };
+            window.app.showToast(`Theme: ${labels[choice]}`, 'info');
+        });
     });
 
     // Language Selection Mock

@@ -1,0 +1,19 @@
+# Remaining Features for Medi-Sum App
+
+Below are the upcoming features to be implemented, strictly one by one:
+
+1. Feature 6: Database Configuration & Setup
+2. Feature 1: Medicine Reminder System
+3. Feature 14: Medicine Alarm Based on Time
+4. Feature 11: Dosage Analysis from Prescription
+5. Feature 12: Doctor's Intent / Notes on Medicine
+6. Feature 15: Remove Checkbox & Course Completion Logic
+7. Feature 13: Lab Results Tab
+8. Feature 16: Records Tab — Tests from Prescription
+9. Feature 9: Image Preview in Records Tab
+10. Feature 10: AI Chat UI Alignment Fix
+11. Feature 7: Medical Profile ↔ Summary & AI Chat Integration
+12. Feature 4: Family History Module
+13. Feature 2: Multi-Language Support
+14. Feature 3: Privacy & Security Documentation
+15. Feature 5: Registration Invite Code / Master Password Restriction (Replacing SMS OTP to prevent unauthorized account creation)

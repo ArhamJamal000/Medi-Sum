@@ -81,6 +81,93 @@
     --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
+/* ============== Dark Theme Overrides ============== */
+[data-theme="dark"] {
+    /* Primary Colors - Slightly lighter for dark backgrounds */
+    --color-primary: #5B8AFF;
+    --color-primary-dark: #4C7AFF;
+    --color-primary-light: rgba(91, 138, 255, 0.15);
+    --color-primary-medium: rgba(91, 138, 255, 0.25);
+
+    /* Background Colors - Deep dark palette */
+    --color-bg: #0F1419;
+    --color-bg-card: #1A1F2E;
+    --color-bg-elevated: #222838;
+    --color-bg-input: #1A1F2E;
+
+    /* Text Colors - Light on dark */
+    --color-text: #E8ECF0;
+    --color-text-secondary: #8B95A5;
+    --color-text-muted: #5A6478;
+
+    /* Semantic Colors - Slightly brighter for contrast */
+    --color-success: #00D68F;
+    --color-success-light: rgba(0, 214, 143, 0.15);
+    --color-warning: #FFB347;
+    --color-warning-light: rgba(255, 179, 71, 0.15);
+    --color-error: #FF6B6B;
+    --color-error-light: rgba(255, 107, 107, 0.15);
+
+    /* Chart Colors */
+    --color-chart-blue: #5B8AFF;
+    --color-chart-gradient-start: rgba(91, 138, 255, 0.3);
+    --color-chart-gradient-end: rgba(91, 138, 255, 0.05);
+
+    /* Border */
+    --color-border: #2A3142;
+    --color-border-light: #1E2535;
+
+    /* Shadows - Darker for dark mode */
+    --shadow-sm: 0px 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-card: 0px 4px 20px rgba(0, 0, 0, 0.35);
+    --shadow-elevated: 0px 8px 32px rgba(0, 0, 0, 0.45);
+    --shadow-float: 0px 12px 48px rgba(0, 0, 0, 0.55);
+    --shadow-primary: 0px 8px 24px rgba(91, 138, 255, 0.2);
+}
+
+/* Dark mode overrides for hardcoded-color elements */
+[data-theme="dark"] .stat-card-white {
+    background: #1A1F2E;
+    border-color: #2A3142;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .stat-card-white:active {
+    background: #222838;
+}
+
+[data-theme="dark"] .stat-card-white .stat-value {
+    color: #E8ECF0;
+}
+
+[data-theme="dark"] .med-time-label {
+    background: #1A1F2E;
+    color: #8B95A5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .med-dot {
+    background: #2A3142;
+    border-color: #1A1F2E;
+}
+
+[data-theme="dark"] .meds-timeline {
+    background: rgba(26, 31, 46, 0.5);
+}
+
+[data-theme="dark"] .loading-screen {
+    background: #0F1419;
+}
+
+[data-theme="dark"] .loading-screen p {
+    color: #8B95A5;
+}
+
+[data-theme="dark"] .spinner {
+    border-color: #2A3142;
+    border-top-color: #5B8AFF;
+}
+
 /* ============== Reset & Base ============== */
 *,
 *::before,

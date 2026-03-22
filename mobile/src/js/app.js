@@ -16,6 +16,7 @@ import { renderVitals } from './pages/vitals.js';
 import { renderSummary } from './pages/summary.js';
 import { renderTests } from './pages/tests.js';
 import { renderReminders } from './pages/reminders.js';
+import { initTheme } from './theme.js';
 
 let currentPage = 'dashboard';
 let isOnAuthScreen = false;  // Track if we're on login/register
@@ -94,7 +95,7 @@ function setActiveTab(page) {
             icon.classList.add('filled');
             tab.querySelector('span:last-child').className = 'text-[10px] font-bold';
         } else {
-            tab.className = 'nav-tab flex flex-col items-center gap-1 text-slate-400';
+            tab.className = 'nav-tab flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500';
             icon.classList.remove('filled');
             tab.querySelector('span:last-child').className = 'text-[10px] font-medium';
         }
@@ -199,6 +200,9 @@ function handleBackButton() {
 
 // ── Init ──
 async function init() {
+    // Initialize theme immediately to prevent flash of wrong theme
+    initTheme();
+
     const loading = document.getElementById('loading');
     const authContainer = document.getElementById('auth-container');
     const mainContainer = document.getElementById('main-container');
