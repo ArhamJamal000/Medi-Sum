@@ -532,7 +532,7 @@ def perform_ocr(image_path, max_retries=3, retry_delay=30):
         img = Image.open(full_path)
         
         # Initialize Gemini model
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Simple OCR prompt (Stage 1 - text extraction only)
         prompt = """Extract all text from this prescription image. 
@@ -645,7 +645,7 @@ def extract_structured_data(ocr_text):
     
     try:
         genai.configure(api_key=gemini_api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         today = datetime.now().strftime("%Y-%m-%d")
         
@@ -1154,7 +1154,7 @@ Do not make up information. Always be accurate about medicine names, dosages, an
 
         # Call Gemini API
         genai.configure(api_key=chat_api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         response = model.generate_content(prompt)
         
@@ -1580,7 +1580,7 @@ def api_upload_report():
             return jsonify({'error': 'AI service unavailable'}), 503
             
         genai.configure(api_key=gemini_api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""You are a medical lab report analyzer. Extract structured data from this report text:
         
@@ -1928,7 +1928,7 @@ def generate_health_summary(user_id, prescriptions, reports):
     
     try:
         genai.configure(api_key=gemini_api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         all_data = '\n\n'.join(data_points)
         
@@ -2161,7 +2161,7 @@ def api_chat():
     
     try:
         genai.configure(api_key=gemini_api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""You are a helpful medical assistant for the Medi-Sum app.
 Answer questions based ONLY on the user's prescription data below.
@@ -2245,7 +2245,7 @@ def api_pharma_compare():
                 raise Exception("No API keys available")
         
             genai.configure(api_key=gemini_api_key)
-            model = genai.GenerativeModel('gemini-2.5-flash')
+            model = genai.GenerativeModel('gemini-1.5-flash')
             
             prompt = f"""You are an expert pharmacist assistant in India. For the medicine "{medicine_name}" {f'({dosage})' if dosage else ''}, provide comprehensive information.
 
