@@ -5,3 +5,4 @@ instance/
 *.pyc
 *.log
 .DS_Store
+mobile/
