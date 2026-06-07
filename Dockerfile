@@ -1,42 +1,53 @@
-# Use Python 3.9 slim image for a smaller footprint
-FROM python:3.9-slim
+# Use Python 3.11 for latest Google API support (Fixes EOL warnings)
+FROM python:3.11-slim-bookworm
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (Tesseract OCR + GL libraries for OpenCV if needed)
+# Install system dependencies
+# libgl1 replaces libgl1-mesa-glx in newer Debian versions
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     libpq-dev \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to leverage Docker cache
+# Create a non-root user (UID 1000)
+RUN useradd -m -u 1000 user
+
+# Set environment variables
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH \
+    HF_HOME=/home/user/.cache/huggingface \
+    PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Prepare Cache dir for user
+RUN mkdir -p $HF_HOME && chown -R user:user /home/user
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements (root ownership is fine here as we are root)
 COPY requirements.txt .
 
-# Install Python dependencies
-# Note: Installing torch/torchvision CPU version to save space/build time if GPU not needed
-# Hugging Face Spaces CPU basic tier does not have GPU
+# Install Python dependencies AS ROOT (Global Install)
+# This avoids permission issues and simplifies path resolution
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-download TrOCR model to avoid timeout on first run
-COPY download_model.py .
-RUN python download_model.py && rm download_model.py
+# Pre-download TrOCR model -> SKIPPED
+# Verification: Build-time download causes OOM on small builders.
+# The app will download the model automatically on first launch (runtime).
 
 # Copy the rest of the application
-COPY . .
+COPY --chown=user:user . .
 
-# Create a non-root user (Hugging Face requirement for security)
-RUN useradd -m -u 1000 user
+# Final switch to user for security
 USER user
-ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:$PATH
 
 # Expose port 7860 (Hugging Face default)
 EXPOSE 7860
 
 # Command to run the application using Gunicorn
-# 2 workers recommended for free tier
 CMD ["gunicorn", "--bind", "0.0.0.0:7860", "--workers", "2", "--timeout", "120", "app:app"]

@@ -3,97 +3,219 @@
 {% block title %}AI Chat - Medi-Sum{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 0 auto;">
-    <h1>💬 AI Health Assistant</h1>
-    <p style="color: #6b7280; margin-bottom: 1.5rem;">Ask questions about your prescriptions, medicines, and health
-        history.</p>
+<div class="chat-page" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <!-- Top Section – Chat Title -->
+    <div class="chat-header" style="text-align: center; margin-bottom: 25px;">
+        <h1 style="font-size: 2.5rem; font-weight: bold; color: #374151; margin: 0;">AI Health Assistant</h1>
+        <p style="font-size: 1.1rem; color: #6b7280; margin: 0;">Ask questions about your prescriptions</p>
+    </div>
 
-    <!-- Chat Container -->
-    <div id="chatContainer"
-        style="background: #f9fafb; border-radius: 12px; height: 400px; overflow-y: auto; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
-        <!-- Welcome Message -->
-        <div class="message bot-message">
-            <div class="avatar">🤖</div>
-            <div class="content">
-                <strong>Medi-Sum AI</strong>
-                <p>Hi! I can help you with information about your prescriptions. Try asking:</p>
-                <ul style="margin: 0.5rem 0; padding-left: 1.5rem; color: #6b7280;">
-                    <li>"What medicines am I taking?"</li>
-                    <li>"Do I have any pending tests?"</li>
-                    <li>"Summarize my last prescription"</li>
-                </ul>
+    <!-- Middle Section – Chat Container -->
+    <div class="chat-container-wrapper" style="display: flex; justify-content: center; margin-bottom: 40px;">
+        <div id="chatContainer" class="chat-container">
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state">
+                <div class="welcome-message">
+                    <div class="avatar">🤖</div>
+                    <div class="content">
+                        <strong>Hi! I can help you understand your prescriptions.</strong>
+                        <p>Try asking one of these questions:</p>
+                    </div>
+                </div>
+                <div class="prompt-cards">
+                    <div class="prompt-card" onclick="sendPrompt('What medicines am I taking?')">What medicines am I taking?</div>
+                    <div class="prompt-card" onclick="sendPrompt('Summarize my last prescription')">Summarize my last prescription</div>
+                    <div class="prompt-card" onclick="sendPrompt('Any pending tests?')">Any pending tests?</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Input Form -->
-    <form id="chatForm" style="display: flex; gap: 0.5rem;">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="text" id="userInput" placeholder="Ask about your prescriptions..."
-            style="flex: 1; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;"
-            autocomplete="off" required>
-        <button type="submit" id="sendBtn" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
-            Send
-        </button>
-    </form>
+    <!-- Bottom Input Section -->
+    <div class="input-section" style="position: sticky; bottom: 0; background: white; padding: 20px 0; border-top: 1px solid #e5e7eb;">
+        <div class="input-wrapper" style="max-width: 70%; margin: 0 auto; display: flex; gap: 10px; align-items: center;">
+            <form id="chatForm" style="flex: 1; display: flex; gap: 10px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" id="userInput" placeholder="Ask about your prescriptions..." autocomplete="off">
+                <button type="submit" id="sendBtn" class="send-btn">Send</button>
+            </form>
+        </div>
+    </div>
 
-    <p class="form-footer" style="margin-top: 1rem;">
+    <p class="form-footer" style="text-align: center; margin-top: 1rem;">
         <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
     </p>
 </div>
 
 <style>
+    /* Page Background */
+    .chat-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding-bottom: 100px;
+    }
+
+    /* Chat Container */
+    .chat-container {
+        width: 70%;
+        height: 480px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        padding: 15px;
+        position: relative;
+    }
+
+    /* Custom Scrollbar */
+    .chat-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Empty State */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+    }
+
+    .welcome-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .welcome-message .avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #10b981;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .welcome-message .content strong {
+        font-size: 1.2rem;
+        color: #374151;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .welcome-message .content p {
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .prompt-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .prompt-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        color: #475569;
+        text-align: left;
+    }
+
+    .prompt-card:hover {
+        background: #e2e8f0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Message Bubbles */
     .message {
         display: flex;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+        gap: 12px;
+        margin-bottom: 8px;
         animation: fadeIn 0.3s ease;
     }
 
     .message .avatar {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         flex-shrink: 0;
+        margin-top: 4px;
     }
 
     .message .content {
-        background: white;
-        padding: 0.75rem 1rem;
-        border-radius: 12px;
-        max-width: 80%;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        padding: 12px 16px;
+        border-radius: 16px;
+        max-width: 75%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        word-wrap: break-word;
     }
 
     .message .content p {
         margin: 0;
+        line-height: 1.4;
     }
 
     .message .content strong {
-        color: #374151;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 4px;
     }
 
     .user-message {
         flex-direction: row-reverse;
+        justify-content: flex-start;
     }
 
     .user-message .avatar {
-        background: #2563eb;
+        background: #3b82f6;
         color: white;
     }
 
     .user-message .content {
-        background: #2563eb;
-        color: white;
+        background: #dbeafe;
+        color: #1e40af;
+        margin-left: auto;
     }
 
     .user-message .content strong {
-        color: rgba(255, 255, 255, 0.8);
+        color: #1d4ed8;
+    }
+
+    .bot-message {
+        justify-content: flex-start;
     }
 
     .bot-message .avatar {
@@ -101,10 +223,25 @@
         color: white;
     }
 
+    .bot-message .content {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .bot-message .content strong {
+        color: #15803d;
+    }
+
+    /* Typing Indicator */
     .typing-indicator {
         display: flex;
         gap: 4px;
-        padding: 0.5rem;
+        padding: 12px 16px;
+        background: #f0fdf4;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        width: fit-content;
+        margin-bottom: 8px;
     }
 
     .typing-indicator span {
@@ -123,28 +260,127 @@
         animation-delay: -0.16s;
     }
 
-    @keyframes bounce {
-
-        0%,
-        80%,
-        100% {
-            transform: scale(0);
-        }
-
-        40% {
-            transform: scale(1);
-        }
+    /* Input Section */
+    .input-section {
+        z-index: 10;
     }
 
+    .input-wrapper {
+        background: white;
+        border-radius: 16px;
+        padding: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #userInput {
+        flex: 1;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+
+    #userInput:focus {
+        border-color: #3b82f6;
+    }
+
+    .send-btn {
+        padding: 12px 20px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 80px;
+    }
+
+    .send-btn:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .send-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Animations */
     @keyframes fadeIn {
         from {
             opacity: 0;
             transform: translateY(10px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
+        }
+    }
+
+    @keyframes bounce {
+        0%, 80%, 100% {
+            transform: scale(0);
+        }
+        40% {
+            transform: scale(1);
+        }
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .chat-page {
+            padding: 10px;
+        }
+
+        .chat-header h1 {
+            font-size: 2rem;
+        }
+
+        .chat-container {
+            width: 100%;
+            height: 400px;
+            padding: 10px;
+        }
+
+        .input-wrapper {
+            max-width: 100%;
+        }
+
+        .send-btn {
+            min-width: 60px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+        }
+
+        .message .content {
+            max-width: 85%;
+        }
+
+        .prompt-cards {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .chat-container {
+            height: 350px;
+        }
+
+        .send-btn {
+            padding: 12px;
+            font-size: 0;
+            min-width: 50px;
+        }
+
+        .send-btn::before {
+            content: "➤";
+            font-size: 1.2rem;
         }
     }
 </style>
@@ -154,9 +390,18 @@
     const chatForm = document.getElementById('chatForm');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    const emptyState = document.getElementById('emptyState');
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
+    let hasUserMessaged = false;
+
     function addMessage(text, isUser) {
+        // Hide empty state on first user message
+        if (isUser && !hasUserMessaged) {
+            emptyState.style.display = 'none';
+            hasUserMessaged = true;
+        }
+
         const div = document.createElement('div');
         div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
         div.innerHTML = `
@@ -167,7 +412,7 @@
         </div>
     `;
         chatContainer.appendChild(div);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollToBottom();
     }
 
     function addTypingIndicator() {
@@ -183,7 +428,7 @@
         </div>
     `;
         chatContainer.appendChild(div);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollToBottom();
     }
 
     function removeTypingIndicator() {
@@ -191,11 +436,14 @@
         if (indicator) indicator.remove();
     }
 
-    chatForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
+    function scrollToBottom() {
+        setTimeout(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 100);
+    }
 
-        const message = userInput.value.trim();
-        if (!message) return;
+    function sendMessage(message) {
+        if (!message.trim()) return;
 
         // Add user message
         addMessage(message, true);
@@ -205,31 +453,58 @@
         // Show typing indicator
         addTypingIndicator();
 
-        try {
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ message: message })
-            });
-
-            const data = await response.json();
+        // Send to backend
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
             removeTypingIndicator();
-
             if (data.error) {
                 addMessage('Sorry, I encountered an error: ' + data.error, false);
             } else {
                 addMessage(data.response, false);
             }
-        } catch (error) {
+        })
+        .catch(error => {
             removeTypingIndicator();
             addMessage('Sorry, something went wrong. Please try again.', false);
-        }
+        })
+        .finally(() => {
+            sendBtn.disabled = false;
+            userInput.focus();
+        });
+    }
 
-        sendBtn.disabled = false;
-        userInput.focus();
+    // Form submit handler
+    chatForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        sendMessage(userInput.value);
     });
+
+    // Enter key handler
+    userInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(userInput.value);
+        }
+    });
+
+    // Prompt click handler
+    function sendPrompt(promptText) {
+        userInput.value = promptText;
+        sendMessage(promptText);
+    }
+
+    // Make sendPrompt global
+    window.sendPrompt = sendPrompt;
+
+    // Focus input on load
+    userInput.focus();
 </script>
 {% endblock %}

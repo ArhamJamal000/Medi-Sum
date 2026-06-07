@@ -3,7 +3,602 @@
 {% block title %}Dashboard - Medi-Sum{% endblock %}
 
 {% block content %}
-<h1 style="margin-bottom: 1.5rem;">Welcome, {{ current_user.name }}! 👋</h1>
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    /* Stats Grid - 4 columns desktop, 2 tablet, 1 mobile */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--color-white);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px var(--color-shadow-light);
+        text-align: center;
+        transition: transform 0.3s;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card .number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--color-electric-cyan);
+        font-family: var(--font-display);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .label {
+        color: var(--color-cool-grey);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* Card consistency */
+    .dashboard-card {
+        background: var(--color-white);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 10px 30px var(--color-shadow-light);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 24px;
+    }
+
+    .dashboard-card h2 {
+        font-size: 1.5rem;
+        margin: 0 0 1rem 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dashboard-card h3 {
+        font-size: 1.25rem;
+        margin: 0 0 1rem 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .quick-actions p {
+        color: var(--color-cool-grey);
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+
+    /* Medical Summary */
+    .medical-summary ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .medical-summary li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .medical-summary li:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        font-weight: 500;
+        color: var(--color-storm-grey);
+    }
+
+    .summary-value {
+        font-weight: 600;
+        color: var(--color-electric-cyan);
+    }
+
+    /* Active Medicines and Pending Tests - Vertical alignment */
+    .medical-alerts {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .alert-card {
+        background: var(--color-white);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 10px 30px var(--color-shadow-light);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .alert-card h2 {
+        font-size: 1.25rem;
+        margin: 0 0 1rem 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .medicine-list,
+    .test-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .medicine-item,
+    .test-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .medicine-item:last-child,
+    .test-item:last-child {
+        border-bottom: none;
+    }
+
+    .medicine-info h3,
+    .test-info h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    .medicine-details,
+    .test-details {
+        font-size: 0.875rem;
+        color: var(--color-cool-grey);
+        font-weight: 500;
+    }
+
+    .medicine-notes,
+    .test-notes {
+        font-size: 0.875rem;
+        color: var(--color-cool-grey);
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+
+    /* Recent Prescriptions */
+    .prescription-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .prescription-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .prescription-item:last-child {
+        border-bottom: none;
+    }
+
+    .prescription-info {
+        flex: 1;
+    }
+
+    .prescription-title {
+        font-weight: 600;
+        color: var(--color-storm-grey);
+        margin-bottom: 0.25rem;
+    }
+
+    .prescription-meta {
+        font-size: 0.875rem;
+        color: var(--color-cool-grey);
+    }
+
+    .prescription-badge {
+        display: inline-block;
+        padding: 0.125rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .badge-medicines {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    /* Health Vitals */
+    .vitals-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        color: var(--color-storm-grey);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-family: var(--font-body);
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--color-electric-cyan);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    }
+
+    .submit-btn {
+        padding: 0.75rem;
+        background: var(--color-electric-cyan);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+        width: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Charts */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: #f9fafb;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .chart-card h3 {
+        font-size: 1.125rem;
+        margin: 0 0 1rem 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+    }
+
+    /* Readings Table */
+    .readings-container {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+    }
+
+    .readings-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .readings-table thead th {
+        background: #f3f4f6;
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--color-storm-grey);
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .readings-table tbody td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .readings-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .delete-btn {
+        background: none;
+        border: none;
+        color: #dc2626;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .delete-btn:hover {
+        background-color: #fef2f2;
+    }
+
+    /* Medical Summary Layout */
+    .medical-summary-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .summary-left,
+    .summary-right {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .summary-section {
+        background: var(--color-white);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .summary-section h3 {
+        font-size: 1.1rem;
+        margin: 0 0 16px 0;
+        color: var(--color-storm-grey);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ai-summary-content p {
+        margin: 0 0 8px 0;
+        color: var(--color-cool-grey);
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    .ai-summary-content p:last-child {
+        margin-bottom: 0;
+    }
+
+    .insights-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .insight-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .insight-item:last-child {
+        border-bottom: none;
+    }
+
+    .insight-item.pending .insight-value {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .insight-item.completed .insight-value {
+        color: #059669;
+        font-weight: 600;
+    }
+
+    .insight-label {
+        font-weight: 500;
+        color: var(--color-storm-grey);
+        font-size: 0.95rem;
+    }
+
+    .insight-value {
+        font-weight: 600;
+        color: var(--color-electric-cyan);
+        font-size: 0.95rem;
+    }
+
+    .medicines-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .medicine-item-compact {
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .medicine-name {
+        font-weight: 600;
+        color: var(--color-storm-grey);
+        margin-bottom: 4px;
+        font-size: 0.95rem;
+    }
+
+    .medicine-details {
+        font-size: 0.85rem;
+        color: var(--color-cool-grey);
+        font-weight: 500;
+    }
+
+    .summary-actions {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .medical-summary-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 0 16px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1.25rem;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+        }
+
+        .dashboard-card {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .medical-alerts {
+            gap: 20px;
+        }
+
+        .alert-card {
+            padding: 20px;
+        }
+
+        .medicine-item,
+        .test-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .vitals-form {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .chart-card {
+            padding: 1rem;
+        }
+
+        .prescription-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .readings-container {
+            max-height: 250px;
+        }
+
+        .readings-table {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-container {
+            padding: 0 12px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .dashboard-card {
+            padding: 16px;
+        }
+
+        .alert-card {
+            padding: 16px;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .stat-card .number {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ current_user.name }}! 👋</h1>
+    </div>
 
 <div class="stats-grid">
     <div class="stat-card">
@@ -19,40 +614,133 @@
         <div class="label">Medical Tests</div>
     </div>
     <div class="stat-card">
-        <div class="number" style="color: {% if pending_tests > 0 %}#ef4444{% else %}#6b7280{% endif %};">{{
+        <div class="number"{% if pending_tests > 0 %} style="color: #ef4444;"{% else %} style="color: #6b7280;"{% endif %}>{{
             pending_tests }}</div>
         <div class="label">Pending Tests</div>
     </div>
 </div>
 
-<div class="card">
-    <h2>Quick Actions</h2>
-    <p style="margin-bottom: 1rem;">Upload a new prescription to get started.</p>
-    <a href="{{ url_for('upload') }}" class="btn btn-primary" style="display: inline-block; width: auto;">
-        📤 Upload Prescription
-    </a>
+<div class="dashboard-card">
+    <h2>⚡ Quick Actions</h2>
+    <div class="quick-actions">
+        <p>Upload a new prescription to get started.</p>
+        <a href="{{ url_for('upload') }}" class="btn btn-primary" style="display: inline-block; width: auto;">
+            📤 Upload Prescription
+        </a>
+    </div>
 </div>
 
-<!-- Active Alerts Section -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+<!-- Overall Medical Summary Card -->
+<div class="dashboard-card">
+    <h2>📋 Overall Medical Summary</h2>
+    {% if recent_prescriptions %}
+    <div class="medical-summary-container">
+        <!-- Desktop: Split layout, Mobile: Stack vertically -->
+        <div class="summary-left">
+            <!-- AI Summary Section -->
+            <div class="summary-section">
+                <h3>AI Summary</h3>
+                {% if recent_prescriptions[0].patient_summary %}
+                <div class="ai-summary-content">
+                    {% for line in recent_prescriptions[0].patient_summary.split('\n') %}
+                    {% if line.strip() %}
+                    <p>{{ line.strip() }}</p>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: var(--color-cool-grey); font-style: italic;">No AI summary available for the latest prescription.</p>
+                {% endif %}
+            </div>
+
+            <!-- Key Insights Section -->
+            <div class="summary-section">
+                <h3>Key Insights</h3>
+                <div class="insights-content">
+                    <div class="insight-item">
+                        <span class="insight-label">Total Prescriptions:</span>
+                        <span class="insight-value">{{ prescription_count }}</span>
+                    </div>
+                    <div class="insight-item">
+                        <span class="insight-label">Active Medicines:</span>
+                        <span class="insight-value">{{ medicine_count }}</span>
+                    </div>
+                    <div class="insight-item">
+                        <span class="insight-label">Medical Tests:</span>
+                        <span class="insight-value">{{ test_count }}</span>
+                    </div>
+                    <div class="insight-item {% if pending_tests > 0 %}pending{% else %}completed{% endif %}">
+                        <span class="insight-label">Pending Tests:</span>
+                        <span class="insight-value">{{ pending_tests }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-right">
+            <!-- Medicines List Section -->
+            <div class="summary-section">
+                <h3>💊 Current Medicines</h3>
+                {% if active_medicines %}
+                <div class="medicines-list">
+                    {% for med in active_medicines[:5] %} <!-- Show first 5 medicines -->
+                    <div class="medicine-item-compact">
+                        <div class="medicine-name">{{ med.name }}</div>
+                        <div class="medicine-details">
+                            {% if med.dosage %}{{ med.dosage }}{% endif %}
+                            {% if med.frequency %} • {{ med.frequency }}{% endif %}
+                            {% if med.duration %} • {{ med.duration }}{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if active_medicines|length > 5 %}
+                    <div class="medicine-item-compact">
+                        <div class="medicine-name" style="font-style: italic; color: var(--color-cool-grey);">
+                            +{{ active_medicines|length - 5 }} more medicines
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p style="color: var(--color-cool-grey); font-style: italic;">No active medicines.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Button -->
+    <div class="summary-actions">
+        <a href="{{ url_for('export_dashboard_pdf') }}" class="btn btn-primary">
+            📄 Export Comprehensive Report
+        </a>
+    </div>
+    {% else %}
+    <p style="color: var(--color-cool-grey);">
+        No prescriptions uploaded yet. Upload your first prescription to see your medical summary.
+    </p>
+    {% endif %}
+</div>
+
+<!-- Active Alerts Section - Vertically Aligned -->
+<div class="medical-alerts">
     <!-- Active Medicines -->
-    <div class="card">
+    <div class="alert-card">
         <h2 style="color: #059669;">💊 Active Medicines</h2>
         {% if active_medicines %}
-        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+        <ul class="medicine-list">
             {% for med in active_medicines %}
-            <li style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
-                <strong>{{ med.name }}</strong>
-                <br>
-                <span style="color: #6b7280; font-size: 0.875rem;">
-                    {{ med.dosage or '' }} • {{ med.frequency or '' }}
-                </span>
-                {% if med.instructions %}
-                <br>
-                <span style="color: #059669; font-size: 0.875rem; font-style: italic;">
-                    Note: {{ med.instructions }}
-                </span>
-                {% endif %}
+            <li class="medicine-item">
+                <div class="medicine-info">
+                    <h3>{{ med.name }}</h3>
+                    <div class="medicine-details">
+                        {{ med.dosage or '' }} • {{ med.frequency or '' }}
+                    </div>
+                    {% if med.instructions %}
+                    <div class="medicine-notes">
+                        Note: {{ med.instructions }}
+                    </div>
+                    {% endif %}
+                </div>
             </li>
             {% endfor %}
         </ul>
@@ -62,19 +750,20 @@
     </div>
 
     <!-- Pending Tests -->
-    <div class="card">
+    <div class="alert-card">
         <h2 style="color: #dc2626;">⚠️ Pending Tests</h2>
         {% if pending_tests_list %}
-        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+        <ul class="test-list">
             {% for test in pending_tests_list %}
-            <li style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
-                <strong>{{ test.test_name }}</strong>
-                {% if test.instructions %}
-                <br>
-                <span style="color: #dc2626; font-size: 0.875rem;">
-                    Instructions: {{ test.instructions }}
-                </span>
-                {% endif %}
+            <li class="test-item">
+                <div class="test-info">
+                    <h3>{{ test.test_name }}</h3>
+                    {% if test.instructions %}
+                    <div class="test-notes">
+                        Instructions: {{ test.instructions }}
+                    </div>
+                    {% endif %}
+                </div>
             </li>
             {% endfor %}
         </ul>
@@ -120,54 +809,58 @@
 {% endif %}
 
 <!-- Health Vitals Tracking -->
-<div class="card" style="margin-top: 1.5rem;">
+<div class="dashboard-card">
     <h2>❤️ Health Vitals</h2>
-    <p style="color: #6b7280; margin-bottom: 1rem;">Record your daily BP and sugar levels.</p>
+    <p style="color: #6b7280; margin-bottom: 1.5rem;">Record your daily BP and sugar levels.</p>
 
     <!-- Input Form -->
-    <form id="vitalsForm"
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-        <div>
-            <label style="font-size: 0.875rem; color: #374151;">BP Systolic</label>
-            <input type="number" id="bpSystolic" placeholder="120" min="60" max="250"
-                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+    <form id="vitalsForm" class="vitals-form">
+        <div class="form-group">
+            <label>BP Systolic</label>
+            <input type="number" id="bpSystolic" placeholder="120" min="60" max="250">
         </div>
-        <div>
-            <label style="font-size: 0.875rem; color: #374151;">BP Diastolic</label>
-            <input type="number" id="bpDiastolic" placeholder="80" min="40" max="150"
-                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        <div class="form-group">
+            <label>BP Diastolic</label>
+            <input type="number" id="bpDiastolic" placeholder="80" min="40" max="150">
         </div>
-        <div>
-            <label style="font-size: 0.875rem; color: #374151;">Sugar (mg/dL)</label>
-            <input type="number" id="sugarLevel" placeholder="100" min="30" max="600"
-                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        <div class="form-group">
+            <label>Sugar (mg/dL)</label>
+            <input type="number" id="sugarLevel" placeholder="100" min="30" max="600">
         </div>
-        <div>
-            <label style="font-size: 0.875rem; color: #374151;">Sugar Type</label>
-            <select id="sugarType" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        <div class="form-group">
+            <label>Sugar Type</label>
+            <select id="sugarType">
                 <option value="fasting">Fasting</option>
                 <option value="random">Random</option>
                 <option value="post_meal">Post Meal</option>
             </select>
         </div>
-        <div style="display: flex; align-items: flex-end;">
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.5rem;">
+        <div class="form-group">
+            <button type="submit" class="submit-btn">
                 Save Today's Reading
             </button>
         </div>
     </form>
 
     <!-- Charts -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+    <div class="charts-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
         <div style="background: #f9fafb; padding: 1rem; border-radius: 8px;">
             <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">📊 Blood Pressure Trend</h3>
-            <canvas id="bpChart" height="150"></canvas>
+            <canvas id="bpChart" width="100%" height="150"></canvas>
         </div>
         <div style="background: #f9fafb; padding: 1rem; border-radius: 8px;">
             <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">🍬 Sugar Level Trend</h3>
-            <canvas id="sugarChart" height="150"></canvas>
+            <canvas id="sugarChart" width="100%" height="150"></canvas>
         </div>
     </div>
+
+    <style>
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
 
     <!-- Readings History -->
     <h3 style="margin-bottom: 0.5rem;">Recent Readings</h3>
@@ -327,5 +1020,7 @@
     // Load on page load
     loadReadings();
 </script>
+
+</div> <!-- End dashboard-container -->
 
 {% endblock %}

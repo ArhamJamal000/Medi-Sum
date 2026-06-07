@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
@@ -10,6 +10,8 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import logging
+from typing import Optional
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Load environment variables
 load_dotenv()
@@ -49,8 +51,12 @@ def get_next_api_key():
     Get the next available Gemini API key.
     Returns (key, key_index) or (None, -1) if all keys exhausted.
     """
-    global _current_key_index
+    global _current_key_index, _api_keys
     
+    # Lazy refresh: If no keys found yet, try loading again (fixes startup timing issues)
+    if not _api_keys:
+        _api_keys = get_gemini_api_keys()
+        
     if not _api_keys:
         return None, -1
     
@@ -88,15 +94,28 @@ def get_api_key_status():
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Apply ProxyFix for correct scheme/host detection behind HF Spaces proxy
+# This ensures url_for() generates https:// links and Secure cookies work
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+# Production Security Headers
+# Check for FLASK_ENV or if we are running on Hugging Face Spaces (SPACE_ID is always set there)
+if os.environ.get('FLASK_ENV') == 'production' or os.environ.get('SPACE_ID'):
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Required for iframed Spaces
+    app.config['PERMANENT_SESSION_LIFETIME'] = 3600 # 1 hour session
+    logger.info("Production/HF Spaces detected: Enabled Secure/SameSite=None cookies")
+
 # Strict Secret Key check for production
 if os.environ.get('FLASK_ENV') == 'production' and not os.environ.get('SECRET_KEY'):
     logger.warning("WARNING: FLASK_ENV is production but SECRET_KEY is not set!")
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 # Hybrid Database Config: PostgreSQL (Prod) or SQLite (Dev)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///medisum.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 # Fix for some Postgres providers (Heroku/Render) that use 'postgres://' instead of 'postgresql://'
-if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
+if app.config.get('SQLALCHEMY_DATABASE_URI') and app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
     app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -106,8 +125,9 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
 login_manager.login_message = 'Please log in to access this page.'
+# Set login_view after initialization to avoid typing issues
+login_manager.login_view = 'login'  # type: ignore
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -117,23 +137,28 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 class User(UserMixin, db.Model):
     """User model for authentication."""
     __tablename__ = 'users'
-    
+
     user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False)  # 'patient' or 'doctor'
+    phone_number = db.Column(db.String(20))
+    sms_enabled = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Relationship to prescriptions
     prescriptions = db.relationship('Prescription', backref='user', lazy=True)
-    
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def get_id(self):
         return str(self.user_id)
-    
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -141,7 +166,7 @@ class User(UserMixin, db.Model):
 class Prescription(db.Model):
     """Prescription model for storing uploaded prescriptions."""
     __tablename__ = 'prescriptions'
-    
+
     prescription_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     image_path = db.Column(db.String(256), nullable=False)
@@ -152,16 +177,19 @@ class Prescription(db.Model):
     visit_reason = db.Column(db.String(255))  # Short title/reason for visit
     key_insights = db.Column(db.String(500))  # One-sentence key insight or takeaway
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Relationships
     medicines = db.relationship('Medicine', backref='prescription', lazy=True, cascade='all, delete-orphan')
     medical_tests = db.relationship('MedicalTest', backref='prescription', lazy=True, cascade='all, delete-orphan')
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Medicine(db.Model):
     """Medicine model for storing extracted medicine information."""
     __tablename__ = 'medicines'
-    
+
     medicine_id = db.Column(db.Integer, primary_key=True)
     prescription_id = db.Column(db.Integer, db.ForeignKey('prescriptions.prescription_id'), nullable=False)
     name = db.Column(db.String(200), nullable=False)
@@ -173,11 +201,14 @@ class Medicine(db.Model):
     end_date = db.Column(db.Date)
     instructions = db.Column(db.Text)  # Any special instructions
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
 class MedicalTest(db.Model):
     """Medical test model for storing extracted test information."""
     __tablename__ = 'medical_tests'
-    
+
     test_id = db.Column(db.Integer, primary_key=True)
     prescription_id = db.Column(db.Integer, db.ForeignKey('prescriptions.prescription_id'), nullable=False)
     test_name = db.Column(db.String(200), nullable=False)  # e.g., "Blood Test", "X-Ray", "MRI"
@@ -185,11 +216,14 @@ class MedicalTest(db.Model):
     status = db.Column(db.String(50), default='pending')  # pending, completed, cancelled
     instructions = db.Column(db.Text)  # Fasting required, etc.
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
 class HealthReading(db.Model):
     """Health reading model for tracking BP and sugar levels."""
     __tablename__ = 'health_readings'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     date = db.Column(db.Date, nullable=False)  # One entry per day
@@ -199,9 +233,12 @@ class HealthReading(db.Model):
     sugar_type = db.Column(db.String(20), default='fasting')  # fasting, random, post_meal
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Relationship
     user = db.relationship('User', backref=db.backref('health_readings', lazy=True))
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 # ============== FLASK-LOGIN ==============
 
@@ -355,8 +392,11 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 
 def allowed_file(filename):
     """Check if file extension is allowed."""
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    if not filename or not isinstance(filename, str) or '.' not in filename:
+        return False
+    # At this point, filename is guaranteed to be a non-empty string
+    ext = filename.rsplit('.', 1)[1].lower()  # type: ignore
+    return ext in ALLOWED_EXTENSIONS
 
 
 def perform_ocr_trocr(image_path):
@@ -395,7 +435,7 @@ def perform_ocr_trocr(image_path):
             strip = image.crop((0, top, width, bottom))
             
             # Process strip
-            pixel_values = processor(strip, return_tensors="pt").pixel_values
+            pixel_values = processor(strip, return_tensors="pt").pixel_values  # type: ignore
             
             with torch.no_grad():
                 generated_ids = model.generate(pixel_values, max_length=128)
@@ -588,9 +628,9 @@ def extract_structured_data(ocr_text):
     try:
         genai.configure(api_key=gemini_api_key)
         model = genai.GenerativeModel('gemini-2.5-flash')
-        
+
         today = datetime.now().strftime("%Y-%m-%d")
-        
+
         prompt = f"""Analyze this prescription text and extract structured data.
 Today's date is: {today}
 
@@ -630,10 +670,11 @@ Rules:
 - If no tests found, return empty array []
 - Return ONLY the JSON object, no other text"""
 
+        response = None
         response = model.generate_content(prompt)
-        
+
         if not response or not response.text:
-            return [], [], None, None, "No response from AI"
+            return [], [], None, None, None, None, None, "No response from AI"
         
         # Clean up response - extract JSON from response
         response_text = response.text.strip()
@@ -676,8 +717,7 @@ Rules:
         
     except json.JSONDecodeError as e:
         logger.error(f"JSON parse error: {e}")
-        logger.error(f"Raw response was: {response.text}") # Log the raw response for debugging
-        return [], [], None, None, None, None, None, f"Failed to parse extracted data. Raw log has details."
+        return [], [], None, None, None, None, None, f"Failed to parse extracted data."
     except Exception as e:
         logger.error(f"Extraction error: {str(e)}")
         return [], [], None, None, None, None, None, f"Extraction failed: {str(e)}"
@@ -733,16 +773,20 @@ def upload():
             # If OCR was successful, extract structured data
             if ocr_text:
                 medicines_data, tests_data, doc_summary, pat_summary, pres_date, reason, insights, extract_error = extract_structured_data(ocr_text)
-                
+
+                # Ensure lists are not None
+                medicines_data = medicines_data or []
+                tests_data = tests_data or []
+
                 # Update prescription with summaries
                 prescription.doctor_summary = doc_summary
                 prescription.patient_summary = pat_summary
                 prescription.prescription_date = pres_date
                 prescription.visit_reason = reason
                 prescription.key_insights = insights
-                
+
                 # Add medicines
-                for med in medicines_data:
+                for med in medicines_data:  # type: ignore
                     if med.get('name'):
                         medicine = Medicine(
                             prescription_id=prescription.prescription_id,
@@ -799,7 +843,7 @@ def view_prescription(prescription_id):
         flash('Access denied.', 'error')
         return redirect(url_for('dashboard'))
     
-    return render_template('results.html', prescription=prescription)
+    return render_template('results_new.html', prescription=prescription)
 
 
 @app.route('/history')
@@ -976,20 +1020,260 @@ def chat():
     return render_template('chat.html')
 
 
+@app.route('/export_dashboard_pdf')
+@login_required
+def export_dashboard_pdf():
+    """Export dashboard summary or prescription summary as PDF."""
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib import colors
+    from io import BytesIO
+    from datetime import datetime
+
+    prescription_id = request.args.get('prescription_id')
+
+    # Create PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        alignment=1  # Center
+    )
+
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=20
+    )
+
+    normal_style = styles['Normal']
+
+    story = []
+
+    if prescription_id:
+        # Generate prescription summary PDF
+        prescription = Prescription.query.get_or_404(prescription_id)
+
+        # Security check: Ensure user owns this prescription
+        if prescription.user_id != current_user.user_id:
+            from flask import abort
+            abort(403)
+
+        # Header with App Name, Patient Name, Prescription ID, Date Generated
+        story.append(Paragraph("Medi-Sum - Medical Report", title_style))
+        story.append(Paragraph(f"Patient: {current_user.name}", normal_style))
+        story.append(Paragraph(f"Prescription ID: {prescription.prescription_id}", normal_style))
+        story.append(Paragraph(f"Date Generated: {datetime.now().strftime('%B %d, %Y')}", normal_style))
+        story.append(Spacer(1, 20))
+
+        # AI Summary text
+        if prescription.patient_summary:
+            story.append(Paragraph("AI Summary", heading_style))
+            for line in prescription.patient_summary.split('\n'):
+                if line.strip():
+                    story.append(Paragraph(f"• {line.strip()}", normal_style))
+            story.append(Spacer(1, 20))
+
+        # Medicines table (name, frequency, duration, timing)
+        if prescription.medicines:
+            story.append(Paragraph("Medicines", heading_style))
+
+            # Create table data
+            table_data = [['Name', 'Dosage', 'Frequency', 'Duration', 'Timing']]
+            for med in prescription.medicines:
+                table_data.append([
+                    med.name or '',
+                    med.dosage or '',
+                    med.frequency or '',
+                    med.duration or '',
+                    med.timing or ''
+                ])
+
+            # Create table
+            table = Table(table_data)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP')
+            ]))
+
+            story.append(table)
+            story.append(Spacer(1, 20))
+
+        # Medical Timeline bullets or table
+        if prescription.medicines:
+            story.append(Paragraph("Treatment Timeline", heading_style))
+            story.append(Paragraph(f"• Prescription started: {prescription.upload_date.strftime('%B %d, %Y')}", normal_style))
+            for med in prescription.medicines:
+                if med.duration:
+                    story.append(Paragraph(f"• {med.name}: Duration {med.duration}, {med.frequency or 'As prescribed'}", normal_style))
+            story.append(Spacer(1, 20))
+
+        # Tests / Alerts section
+        if prescription.medical_tests:
+            story.append(Paragraph("Tests & Alerts", heading_style))
+            for test in prescription.medical_tests:
+                status_text = f" (Status: {test.status.title()})" if test.status else ""
+                story.append(Paragraph(f"• {test.test_name}{status_text}", normal_style))
+                if test.instructions:
+                    story.append(Paragraph(f"  Instructions: {test.instructions}", normal_style))
+            story.append(Spacer(1, 20))
+
+        # Footer disclaimer
+        story.append(Spacer(1, 40))
+        disclaimer_text = "This is an AI-generated summary for informational purposes only. Please consult with your healthcare provider for medical advice and treatment decisions."
+        story.append(Paragraph(disclaimer_text, ParagraphStyle('Disclaimer', parent=normal_style, fontSize=10, textColor=colors.grey, alignment=1)))
+
+        filename = f"prescription_summary_{prescription.prescription_id}.pdf"
+
+    else:
+        # Generate comprehensive prescription report PDF (enhanced dashboard export)
+        # Get all user's prescriptions with full details
+        all_prescriptions = Prescription.query.filter_by(user_id=current_user.user_id)\
+            .order_by(Prescription.upload_date.desc()).all()
+
+        # Header with App Name, Patient Name, Report Date
+        story.append(Paragraph("Medi-Sum - Comprehensive Medical Report", title_style))
+        story.append(Paragraph(f"Patient: {current_user.name}", normal_style))
+        story.append(Paragraph(f"Report Generated: {datetime.now().strftime('%B %d, %Y')}", normal_style))
+        story.append(Spacer(1, 20))
+
+        # Summary Overview
+        prescription_count = len(all_prescriptions)
+        medicine_count = sum(len(p.medicines) for p in all_prescriptions)
+        test_count = sum(len(p.medical_tests) for p in all_prescriptions)
+        pending_tests = sum(1 for p in all_prescriptions for t in p.medical_tests if t.status == 'pending')
+
+        story.append(Paragraph("Medical Overview", heading_style))
+        story.append(Paragraph(f"Total Prescriptions: {prescription_count}", normal_style))
+        story.append(Paragraph(f"Active Medicines: {medicine_count}", normal_style))
+        story.append(Paragraph(f"Medical Tests: {test_count}", normal_style))
+        if pending_tests > 0:
+            story.append(Paragraph(f"Pending Tests: {pending_tests}", normal_style))
+        story.append(Spacer(1, 20))
+
+        # Process each prescription
+        for prescription in all_prescriptions:
+            # Prescription Header
+            date_str = prescription.prescription_date.strftime('%B %d, %Y') if prescription.prescription_date else prescription.upload_date.strftime('%B %d, %Y')
+            story.append(Paragraph(f"Prescription #{prescription.prescription_id} - {date_str}", heading_style))
+            story.append(Spacer(1, 10))
+
+            # Visit Reason and Key Insights
+            if prescription.visit_reason:
+                story.append(Paragraph(f"Visit Reason: {prescription.visit_reason}", normal_style))
+            if prescription.key_insights:
+                story.append(Paragraph(f"Key Insights: {prescription.key_insights}", normal_style))
+            story.append(Spacer(1, 10))
+
+            # AI Summary
+            if prescription.patient_summary:
+                story.append(Paragraph("AI Summary", ParagraphStyle('SubHeading', parent=heading_style, fontSize=14)))
+                for line in prescription.patient_summary.split('\n'):
+                    if line.strip():
+                        story.append(Paragraph(f"• {line.strip()}", normal_style))
+                story.append(Spacer(1, 15))
+
+            # Medicines Section
+            if prescription.medicines:
+                story.append(Paragraph("Medicines Prescribed", ParagraphStyle('SubHeading', parent=heading_style, fontSize=14)))
+
+                # Create medicines table
+                med_table_data = [['Medicine', 'Dosage', 'Frequency', 'Duration', 'Timing']]
+                for med in prescription.medicines:
+                    med_table_data.append([
+                        med.name or '',
+                        med.dosage or '',
+                        med.frequency or '',
+                        med.duration or '',
+                        med.timing or ''
+                    ])
+
+                med_table = Table(med_table_data, colWidths=[120, 80, 80, 80, 80])
+                med_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 9)
+                ]))
+
+                story.append(med_table)
+                story.append(Spacer(1, 15))
+
+            # Medical Tests Section
+            if prescription.medical_tests:
+                story.append(Paragraph("Medical Tests", ParagraphStyle('SubHeading', parent=heading_style, fontSize=14)))
+
+                for test in prescription.medical_tests:
+                    status_text = f" (Status: {test.status.title()})" if test.status else ""
+                    story.append(Paragraph(f"• {test.test_name}{status_text}", normal_style))
+                    if test.instructions:
+                        story.append(Paragraph(f"  Instructions: {test.instructions}", ParagraphStyle('Instructions', parent=normal_style, fontSize=9, leftIndent=20)))
+                story.append(Spacer(1, 15))
+
+            # Add separator between prescriptions
+            if prescription != all_prescriptions[-1]:
+                story.append(Spacer(1, 20))
+                # Add a horizontal line
+                from reportlab.platypus import HRFlowable
+                story.append(HRFlowable(width="100%", thickness=1, color=colors.lightgrey))
+                story.append(Spacer(1, 20))
+
+        # Footer disclaimer
+        story.append(Spacer(1, 40))
+        disclaimer_text = "This is an AI-generated comprehensive medical report for informational purposes only. Please consult with your healthcare provider for medical advice and treatment decisions."
+        story.append(Paragraph(disclaimer_text, ParagraphStyle('Disclaimer', parent=normal_style, fontSize=10, textColor=colors.grey, alignment=1)))
+
+        filename = f"comprehensive_medical_report_{current_user.name.replace(' ', '_')}.pdf"
+
+    # Build PDF
+    doc.build(story)
+
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/pdf'
+    )
+
+
 @app.route('/api/chat', methods=['POST'])
 @login_required
 def chat_api():
     """API endpoint for RAG chatbot. Uses context injection with Gemini."""
     import google.generativeai as genai
     from flask import jsonify
-    
+
+    key_index = -1  # Initialize key_index
+
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
-        
+
         if not user_message:
             return jsonify({'error': 'Please enter a message'}), 400
-        
+
         # Use dedicated chatbot API key (separate quota from OCR)
         chat_api_key = os.getenv('GEMINI_CHAT_API_KEY', '')
         if not chat_api_key:
@@ -997,9 +1281,12 @@ def chat_api():
             chat_api_key, key_index = get_next_api_key()
         else:
             key_index = -1  # Dedicated key, no rotation needed
-        
+
         if not chat_api_key:
-            return jsonify({'error': 'AI service temporarily unavailable'}), 503
+            # Debug logging for deployment issues
+            logger.error(f"Chat API failed: No keys found. GEMINI_CHAT_API_KEY set? {bool(os.getenv('GEMINI_CHAT_API_KEY'))}")
+            logger.error(f"Fallback rotation status: {get_api_key_status()}")
+            return jsonify({'error': 'AI service temporarily unavailable (Check Logs: No API Keys found)'}), 503
         
         # Build context from user's prescriptions
         prescriptions = Prescription.query.filter_by(user_id=current_user.user_id)\
@@ -1116,6 +1403,29 @@ def init_db():
     with app.app_context():
         db.create_all()
         logger.info("Database initialized!")
+
+
+@app.route('/debug/config')
+@login_required
+def debug_config():
+    """Debug endpoint to check if Env Vars are actually loaded."""
+    if not current_user.is_authenticated: # Double check
+        return "Unauthorized", 403
+        
+    env_vars = {}
+    # Check specific keys we care about
+    keys_to_check = ['GEMINI_API_KEY', 'GEMINI_API_KEYS', 'GEMINI_CHAT_API_KEY', 'SECRET_KEY', 'DATABASE_URL', 'SPACE_ID']
+    
+    for key in keys_to_check:
+        value = os.getenv(key)
+        if value:
+            # Mask the value, show only first 4 chars
+            masked = value[:4] + "..." + value[-4:] if len(value) > 8 else "***"
+            env_vars[key] = f"PRESENT ({len(value)} chars) -> {masked}"
+        else:
+            env_vars[key] = "MISSING ❌"
+            
+    return jsonify(env_vars)
 
 
 if __name__ == '__main__':
